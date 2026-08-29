@@ -1,26 +1,38 @@
-import { MOCK_CONTENT } from '@/data/mockContent';
+import { useContentData } from '@/hooks/useContentData';
 import { CONTENT_STAGES, STAGE_ORDER, getPlatform, getFormat } from '@/data/platforms';
 import type { ContentItem, ContentStage } from '@/types';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Database } from 'lucide-react';
 
 interface PipelineViewProps {
   onItemClick: (item: ContentItem) => void;
 }
 
 export function PipelineView({ onItemClick }: PipelineViewProps) {
+  const { content, dbLive, loading } = useContentData();
   return (
     <div className="p-8 max-w-[1600px] mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Content Pipeline</h2>
-        <p className="text-sm text-slate-500">
-          Track content as it moves through the universal workflow stages
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">Content Pipeline</h2>
+          <p className="text-sm text-slate-500">
+            Track content as it moves through the universal workflow stages
+          </p>
+        </div>
+        {dbLive && (
+          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-full">
+            <Database size={13} />
+            Saved to database
+          </span>
+        )}
       </div>
+      {loading && (
+        <p className="text-sm text-slate-400 mb-4">Loading from database…</p>
+      )}
 
       <div className="flex gap-4 overflow-x-auto pb-4">
         {STAGE_ORDER.map((stageId) => {
           const stageInfo = CONTENT_STAGES.find((s) => s.id === stageId)!;
-          const items = MOCK_CONTENT.filter((c) => c.stage === stageId);
+          const items = content.filter((c) => c.stage === stageId);
 
           return (
             <div key={stageId} className="w-72 shrink-0">

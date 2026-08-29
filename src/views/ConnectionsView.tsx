@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAccountConnections } from '@/hooks/useAccountConnections';
 import {
   Instagram,
   Facebook,
@@ -65,38 +66,14 @@ const CONNECTORS: ConnectorDef[] = [
   },
 ];
 
-const STORAGE_KEY = 'channel-studio-connections';
-
-function loadConnections(): Record<string, boolean> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Record<string, boolean>;
-  } catch {
-    /* ignore */
-  }
-  return {};
-}
-
 export function ConnectionsView() {
-  const [connections, setConnections] = useState<Record<string, boolean>>(loadConnections);
+  const { connections, toggle, dbReady } = useAccountConnections();
   const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(connections));
-    } catch {
-      /* ignore */
-    }
-  }, [connections]);
 
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 400);
     return () => clearTimeout(t);
   }, []);
-
-  const toggle = (id: string) => {
-    setConnections((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const connectedCount = CONNECTORS.filter((c) => connections[c.id]).length;
 
@@ -123,10 +100,10 @@ export function ConnectionsView() {
       <div className="flex items-start gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 mb-6">
         <Info size={18} className="text-sky-500 mt-0.5 shrink-0" />
         <p className="text-xs text-sky-700 leading-relaxed">
-          Right now Connect is a demo tick so nothing blocks you — no password or token
-          is stored. As we wire each platform, this becomes a real “Login with…“ button
-          and the brain gets live posting. Facebook/Meta makes sense as a connector
-          because one Meta login can also authorize Instagram.
+          {dbReady
+            ? 'Connections are saved to your Supabase database — they survive phone restarts and sync across devices. Still a demo tick (no password stored); real \u201cLogin with\u2026\u201d buttons come as we wire each platform.'
+            : 'Right now Connect is a demo tick saved on this device only — the database table has not been created yet. Run the SQL migration (supabase/migrations/20260829200000_account_connections.sql) to switch connections to cloud storage.'}
+          {' '}Facebook/Meta makes sense as a connector because one Meta login can also authorize Instagram.
         </p>
       </div>
 

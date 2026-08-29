@@ -42,8 +42,21 @@ Rollout order: validate baseline → deploy gate → Instagram pilot → TikTok 
   real login buttons come per platform as connectors are wired.
 - Deployment gate checklist in the app (10 items, 9 required before rollout).
 
+### Database (live now)
+- Supabase project is live and seeded: `content_items` (12 real rows across all 4
+  platforms), `workflow_runs` (12 rows), `rollout_checkpoints`.
+- `src/lib/supabase.ts` client wired to the live project via `.env`
+  (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` — anon is public by design, safe).
+- **Content Pipeline now reads real rows from the database** (`useContentData` hook,
+  mock fallback when DB is unreachable). Shows a "Saved to database" badge when live.
+- **Account Connections now persists via database** (`useAccountConnections` hook) once
+  the `account_connections` table exists — graceful fallback to device storage today.
+- To enable cloud-saved connections, run the SQL in
+  `supabase/migrations/20260829200000_account_connections.sql` in the Supabase dashboard
+  SQL editor (2-minute job, no secrets needed).
+
 ### Next / future
-- Persist real data (Supabase is scaffolded but not fully wired).
+- Run the account_connections migration to turn connections cloud-saved.
 - Real AI content generation per account brain.
 - Real platform API connectors (Instagram/TikTok/Pinterest/LinkedIn publishing).
 - Live deployment of this repo (the current live Bolt site still has no Pinterest).
