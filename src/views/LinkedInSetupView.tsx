@@ -449,4 +449,14 @@ export function LinkedInSetupView() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-slate-700">Setup Summary</h3>
-            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed"
+            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+              {allPrerequisitesMet
+                ? 'All prerequisites met. LinkedIn setup is configured and ready for pilot testing.'
+                : `${prerequisiteChecks.filter((c) => !c.met).length} prerequisite(s) still need attention.`}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -103,7 +103,7 @@ export function InstagramPilotView() {
           <div className="flex-1">
             <h3
               className={`text-sm font-semibold ${
-                pilotComplete ? 'text-emerald-800' : allPrerequisitesMet ? 'text-amber-800' : 'text-slate-700'
+                pilotComplete ? 'text-emerald-800' : allPrerequisitesMet ? 'text-amber-800' : 'text-slate-700'}
               }`}
             >
               {pilotComplete
@@ -118,8 +118,10 @@ export function InstagramPilotView() {
               }`}
             >
               {pilotComplete
-                ? 'Instagram can run as the first channel without breaking the simplicity, stabilis.length} reused)
-          </span>
+                ? 'Instagram can run as the first channel without breaking the simplicity, stability, or the universal fallback.'
+                : `${baselineElements.filter((e) => e.reusedAsIs).length} of ${baselineElements.length} elements reused`}
+            </p>
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-2">
           {baselineElements.map((el) => {
@@ -188,9 +190,10 @@ export function InstagramPilotView() {
             const StageIcon = STAGE_ICONS[adj.stageId] || Circle;
             const enabled = adj.enabled;
             return (
-              <div
+              <button
                 key={adj.id}
-                className={`flex items-start gap-3 px-4 py-3 rounded-xl border transition-all ${
+                onClick={() => allPrerequisitesMet && toggleAdjustment(adj.id)}
+                className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border transition-all ${
                   enabled
                     ? 'bg-sky-50/50 border-sky-200'
                     : 'bg-white border-slate-200'
@@ -205,8 +208,10 @@ export function InstagramPilotView() {
                   <StageIcon
                     size={16}
                     style={{ color: enabled ? instagramPlatform.color : '#94A3B8' }}
-                  {check.label}
-                  </p>
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700">{check.label}</p>
                   <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{check.description}</p>
                 </div>
               </button>
@@ -309,4 +314,21 @@ export function InstagramPilotView() {
           <div>
             <h3
               className={`text-sm font-semibold ${
-            
+                pilotComplete ? 'text-emerald-800' : 'text-slate-700'
+              }`}
+            >
+              {pilotComplete
+                ? 'Baseline validated — Instagram is ready to run'
+                : 'Instagram pilot in progress'}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {pilotComplete
+                ? 'The universal workflow has been proven on Instagram. Lessons apply to TikTok, Pinterest, and LinkedIn.'
+                : 'Entry criteria must pass before the pilot moves to full rollout.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

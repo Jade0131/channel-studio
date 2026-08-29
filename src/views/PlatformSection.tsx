@@ -111,3 +111,50 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
               <span className="text-xs text-slate-400">{count}</span>
               {isActive && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {activeFormat !== 'all' && (
+        <div className="mb-6 p-4 bg-sky-50 border border-sky-100 rounded-xl">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
+              {(() => {
+                const Icon = FORMAT_ICONS[getFormat(activeFormat)?.icon || ''] || ImageIcon;
+                return <Icon size={18} className="text-sky-600" />;
+              })()}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-800">
+                {getFormat(activeFormat)?.label}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {getFormat(activeFormat)?.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {filteredContent.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+            <Plus size={28} className="text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-600 mb-1">No content yet</p>
+          <p className="text-xs text-slate-400">
+            Create your first {activeFormat !== 'all' ? getFormat(activeFormat)?.label.toLowerCase() : ''} content for {platform.label}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          {filteredContent.map((item) => (
+            <ContentCard key={item.id} item={item} onClick={onItemClick} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

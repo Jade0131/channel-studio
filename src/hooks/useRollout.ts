@@ -140,4 +140,27 @@ export function useRollout() {
   );
 
   const isFullyRolledOut = useMemo(
-    () => st
+    () => steps.filter((s) => s.checkpoints.length > 0).every((s) => s.status === 'passed'),
+    [steps]
+  );
+
+  return {
+    steps,
+    currentStep,
+    completedCount,
+    isFullyRolledOut,
+    toggleEntryCriterion,
+    toggleCheckpoint,
+    activateStep,
+    completeStep,
+    resetStep,
+    resetAll,
+    canActivate,
+    canComplete,
+    allEntryCriteriaMet,
+    allCheckpointsPassed,
+    areDependenciesMet,
+  };
+}
+
+export type UseRolloutReturn = ReturnType<typeof useRollout>;

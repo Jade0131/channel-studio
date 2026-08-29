@@ -139,7 +139,12 @@ export function FallbackPathView() {
       </div>
 
       {/* Failure Case Simulator */}
-      <div className=     <div className="space-y-2">
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity size={16} className="text-slate-400" />
+          <h3 className="text-sm font-semibold text-slate-700">Failure Case Simulator</h3>
+        </div>
+        <div className="space-y-2">
           {FALLBACK_STEPS.map((step, i) => {
             const Icon = STEP_ICONS[step.id] || Circle;
             const isComplete = mode === 'fallback' && i < fallbackStepProgress;
@@ -232,10 +237,60 @@ export function FallbackPathView() {
                   {mvp.required && (
                     <span className="flex items-center gap-0.5 text-[9px] font-medium text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full">
                       <Lock size={8} />
-                        <p className="mt-3 text-xs text-slate-400 text-center">
+                      Required
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{mvp.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recovery Checks */}
+      {mode === 'fallback' && fallbackStepProgress >= FALLBACK_STEPS.length && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck size={16} className="text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-700">Recovery Checks</h3>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
+            {recoveryChecks.map((check) => (
+              <button
+                key={check.id}
+                onClick={() => toggleRecoveryCheck(check.id)}
+                className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                  check.checked
+                    ? 'bg-emerald-50/50 border border-emerald-100'
+                    : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                    check.checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                  }`}
+                >
+                  {check.checked ? (
+                    <CheckCircle2 size={12} className="text-white" />
+                  ) : (
+                    <Circle size={12} className="text-transparent" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className={check.checked ? 'text-sm font-medium text-slate-700' : 'text-sm font-medium text-slate-600'}>
+                    {check.label}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{check.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="mt-3">
+            <p className="text-xs text-slate-400 text-center">
               Complete all required recovery checks before returning to normal mode.
             </p>
-          )}
+          </div>
         </div>
       )}
 

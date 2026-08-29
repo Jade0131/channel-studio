@@ -118,42 +118,86 @@ export function ChannelRolloutView() {
         </div>
       </div>
 
+
       {/* Working Rule Callout */}
       <div className="mb-8 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-        <div classNa                       {statusCfg.label}
+        <div className="flex items-start gap-3">
+          <Flag size={16} className="text-amber-600 mt-0.5 shrink-0" />
+          <div>
+            <h4 className="text-sm font-semibold text-amber-800">Working Rule</h4>
+            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+              Roll out only at a pace that keeps the system smooth and manageable. Prefer steady expansion
+              over fast expansion. Stop and simplify if a new channel introduces unnecessary pressure.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Step Cards */}
+      <div className="space-y-4 mb-8">
+        {steps.map((step) => {
+          const platform = getPlatform(step.platformId);
+          const isPhase = step.checkpoints.length === 0;
+          const statusCfg = STATUS_CONFIG[step.status] || STATUS_CONFIG.locked;
+          const expanded = expandedId === step.id;
+          const criteriaMet = step.entryCriteria.every((c) => c.met);
+          const depsMet = areDependenciesMet(step.id);
+          const canAct = canActivate(step.id);
+          const canComp = canComplete(step.id);
+
+          return (
+            <div
+              key={step.id}
+              className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all hover:shadow-sm"
+            >
+              {/* Step Header */}
+              <button
+                onClick={() => setExpandedId(expanded ? null : step.id)}
+                className="w-full text-left px-5 py-4 flex items-center gap-4"
+              >
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: statusCfg.bg }}
+                >
+                  <step.icon size={16} style={{ color: statusCfg.color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-800">{step.label}</span>
+                    {platform && !isPhase && (
+                      <span
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-md"
+                        style={{ backgroundColor: `${platform.color}18`, color: platform.color }}
+                      >
+                        {platform.label}
                       </span>
-                    </div>
-                    <p className="text-xs text-slate-500 truncate">{step.notes}</p>
+                    )}
+                    {!isPhase && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-violet-100 text-violet-700">
+                        Channel Step
+                      </span>
+                    )}
                   </div>
+                  <p className="text-xs text-slate-500 mt-0.5 truncate">{step.notes}</p>
+                </div>
+                <span
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0"
+                  style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}
+                >
+                  <statusCfg.icon size={11} />
+                  {statusCfg.label}
+                </span>
+              </button>
 
-                  {platform && !isPhase && (
-                    <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{
-                        backgroundColor: `${platform.color}18`,
-                        color: platform.color,
-                      }}
-                    >
-                      {platform.label[0]}
-                    </span>
-                  )}
-
-                  {step.status === 'passed' && (
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                  )}
-                </button>
-
-                {/* Expanded Detail */}
-                {isExpanded && (
-                  <div className="px-5 pb-5 pt-1 border-t border-slate-100">
-                    {/* Entry Criteria */}
+              {/* Expanded Content */}
+              {expanded && (
+                <div className="px-5 pb-5 border-t border-slate-100">
+                  {/* Entry Criteria */}
+                  {step.entryCriteria.length > 0 && (
                     <div className="mt-4">
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2 flex items-center gap-1.5">
-                        <Flag size={12} />
+                        <Layers size={12} />
                         Entry Criteria
-                        <span className="ml-1 text-slate-300">
-                          ({step.entryCriteria.filter((c) => c.met).length}/{step.entryCriteria.length} met)
-                        </span>
                       </p>
                       <div className="space-y-1.5">
                         {step.entryCriteria.map((criterion) => {
@@ -196,10 +240,142 @@ export function ChannelRolloutView() {
                         })}
                       </div>
                     </div>
+                  )}
 
-                    {/* Checkpoints (only for channel steps) */}
-                    {step.checkpoints.length > 0 && (
-                      <div className="mt-4">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2 flex items-center gap-1.5">
-                          <CheckCircle2 size={12} />
-  
+                  {/* Checkpoints (only for channel steps) */}
+                  {step.checkpoints.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2 flex items-center gap-1.5">
+                        <CheckCircle2 size={12} />
+                        Checkpoints
+                      </p>
+                      <div className="space-y-1.5">
+                        {step.checkpoints.map((cp) => {
+                          const passed = cp.passed;
+                          return (
+                            <button
+                              key={cp.id}
+                              onClick={() => toggleCheckpoint(step.id, cp.id)}
+                              className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                                passed
+                                  ? 'bg-emerald-50/50 border border-emerald-100'
+                                  : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                              }`}
+                            >
+                              <div
+                                className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                  passed ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                                }`}
+                              >
+                                {passed ? (
+                                  <CheckCircle2 size={12} className="text-white" />
+                                ) : (
+                                  <Circle size={12} className="text-transparent" />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <p className={`text-sm font-medium ${passed ? 'text-slate-700' : 'text-slate-600'}`}>
+                                  {cp.label}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                  {cp.description}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+
+                    {/* Action Buttons */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                      {step.status === 'locked' && canAct && (
+                        <button
+                          onClick={() => activateStep(step.id)}
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                        >
+                          <Rocket size={15} />
+                          {isPhase ? 'Confirm & Proceed' : 'Activate Channel'}
+                        </button>
+                      )}
+                      {step.status === 'locked' && !canAct && (
+                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <Lock size={12} />
+                          {step.dependencies.length > 0 && !depsMet
+                            ? 'Waiting on previous step to pass'
+                            : !criteriaMet
+                            ? 'Meet all entry criteria to unlock'
+                            : 'Cannot activate yet'}
+                        </span>
+                      )}
+                      {step.status === 'in-progress' && canComp && (
+                        <button
+                          onClick={() => completeStep(step.id)}
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
+                        >
+                          <CheckCircle2 size={15} />
+                          Complete & Pass
+                        </button>
+                      )}
+                      {step.status === 'in-progress' && !canComp && (
+                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <Clock size={12} />
+                          Pass all checkpoints to complete
+                        </span>
+                      )}
+                      {step.status === 'passed' && (
+                        <button
+                          onClick={() => resetStep(step.id)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                        >
+                          <RotateCcw size={12} />
+                          Reset Step
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+      {/* Dependency Map */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <GitBranch size={16} className="text-slate-400" />
+          <h3 className="text-sm font-semibold text-slate-700">Dependency Map</h3>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
+          <div className="space-y-2">
+            {ROLLOUT_DEPENDENCIES.map((dep) => {
+              const fromStep = steps.find((s) => s.id === dep.from);
+              const toStep = steps.find((s) => s.id === dep.to);
+              const fromPassed = fromStep && fromStep.status === 'passed';
+              if (!fromStep || !toStep) return null;
+              return (
+                <div
+                  key={dep.id}
+                  className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 rounded-lg"
+                >
+                  <span className="text-xs font-medium text-slate-600">{fromStep.label}</span>
+                  <ArrowRight size={12} className={`${fromPassed ? 'text-emerald-400' : 'text-slate-300'}`} />
+                  <span className="text-xs font-medium text-slate-600">{toStep.label}</span>
+                  <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    dep.type === 'blocking' ? 'bg-red-100 text-red-700' :
+                    dep.type === 'conditional' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-500'
+                  }`}>
+                    {dep.type}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

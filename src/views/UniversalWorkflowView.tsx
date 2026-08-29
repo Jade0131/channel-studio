@@ -270,4 +270,12 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
                     <td className="px-4 py-2.5 text-right text-sm text-slate-600">{run.itemsGenerated}</td>
                     <td className="px-4 py-2.5 text-right text-sm text-slate-400 font-mono">{run.duration}</td>
                   </tr>
-               
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -100,4 +100,198 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
                   {pending} pending
                 </span>
               ) : (
-                <Lock size={12} class
+                <Lock size={12} className={isActive ? 'text-white/60' : 'text-slate-400'} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-3 mb-6">
+        {(Object.keys(DECISION_CONFIG) as ApprovalDecision[]).map((decision) => {
+          const cfg = DECISION_CONFIG[decision];
+          const Icon = cfg.icon;
+          const count = decisionCounts[decision] || 0;
+          return (
+            <div
+              key={decision}
+              className="bg-white border border-slate-200 rounded-xl p-4"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: cfg.bg }}
+                >
+                  <Icon size={15} style={{ color: cfg.color }} />
+                </div>
+              </div>
+              <p className="text-xl font-bold text-slate-900">{count}</p>
+              <p className="text-xs text-slate-500">{cfg.label}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Review Checklist */}
+      {activeBatch.status === 'open' && (
+        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <ListChecks size={16} className="text-sky-500" />
+            <h3 className="text-sm font-semibold text-slate-700">Review Checklist</h3>
+            <span className="text-xs text-slate-400">
+              ({Object.values(checklistState).filter(Boolean).length}/{REVIEW_CHECKLIST.length} checked)
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {REVIEW_CHECKLIST.map((item) => {
+              const checked = checklistState[item.id] || false;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() =>
+                    setChecklistState((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+                  }
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-left transition-all ${
+                    checked
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all ${
+                      checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                    }`}
+                  >
+                    {checked && <CheckSquare size={12} className="text-white" />}
+                  </div>
+                  <span className="text-xs">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <input
+              type="text"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Reviewer name..."
+              className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:bg-white focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
+            />
+            <button
+              onClick={handleCloseBatch}
+              disabled={!allChecked || pendingApprovals > 0}
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                allChecked && pendingApprovals === 0
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              <FileCheck size={15} />
+              Close Batch
+            </button>
+          </div>
+          {pendingApprovals > 0 && (
+            <p className="mt-2 text-xs text-slate-400">
+              {pendingApprovals} item(s) still need a decision before closing.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Approval Items */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">
+          Content for Review — {activeBatch.weekLabel}
+        </h3>
+        <div className="space-y-2">
+          {activeBatch.items.map((item) => {
+            const platform = getPlatform(item.platform);
+            const format = getFormat(item.format);
+            if (!platform || !format) return null;
+            const cfg = DECISION_CONFIG[item.decision];
+            const DecisionIcon = cfg.icon;
+            const isClosed = activeBatch.status === 'closed';
+
+            return (
+              <div
+                key={item.contentId}
+                className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
+                    style={{ backgroundColor: `${platform.color}18`, color: platform.color }}
+                  >
+                    {platform.label[0]}
+                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{item.title}</p>
+                    <p className="text-xs text-slate-400">
+                      {platform.label} · {format.label}
+                      {item.reviewer && ` · Reviewed by ${item.reviewer}`}
+                    </p>
+                  </div>
+
+                  <span
+                    className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full shrink-0"
+                    style={{ backgroundColor: cfg.bg, color: cfg.color }}
+                  >
+                    <DecisionIcon size={11} />
+                    {cfg.label}
+                  </span>
+
+                  {!isClosed && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => handleDecision(item.contentId, 'approved')}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                          item.decision === 'approved'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                        }`}
+                      >
+                        <CheckCircle2 size={13} />
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleDecision(item.contentId, 'revisions')}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                          item.decision === 'revisions'
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                        }`}
+                      >
+                        <RotateCcw size={13} />
+                        Revise
+                      </button>
+                      <button
+                        onClick={() => handleDecision(item.contentId, 'rejected')}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                          item.decision === 'rejected'
+                            ? 'bg-rose-500 text-white'
+                            : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                        }`}
+                      >
+                        <XCircle size={13} />
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {item.notes && (
+                  <div className="mt-2 ml-11 pl-3 border-l-2 border-slate-200">
+                    <p className="text-xs text-slate-500 italic">{item.notes}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -82,4 +82,12 @@ export function PipelineView({ onItemClick }: PipelineViewProps) {
                       <ArrowRight size={10} />
                     </span>
                   )}
-                </p
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

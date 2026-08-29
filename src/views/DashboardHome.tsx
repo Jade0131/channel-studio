@@ -1,4 +1,46 @@
-               </div>
+import { PLATFORMS, CONTENT_STAGES, getFormat } from '@/data/platforms';
+import { MOCK_CONTENT } from '@/data/mockContent';
+import type { PlatformId, ViewId } from '@/types';
+import { ArrowRight, LayoutDashboard } from 'lucide-react';
+
+interface DashboardHomeProps {
+  onPlatformSelect: (platformId: PlatformId) => void;
+  onNavigate: (view: ViewId) => void;
+}
+
+export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomeProps) {
+  return (
+    <div className="p-8 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <LayoutDashboard size={18} className="text-sky-500" />
+          <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
+        </div>
+        <p className="text-sm text-slate-500">
+          Overview of all channels, content pipeline, and workflow status
+        </p>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Channels</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {PLATFORMS.map((platform) => {
+            const platformContent = MOCK_CONTENT.filter((c) => c.platform === platform.id);
+            const platformPublished = platformContent.filter((c) => c.stage === 'published').length;
+            return (
+              <button
+                key={platform.id}
+                onClick={() => onPlatformSelect(platform.id)}
+                className="group text-left bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold"
+                      style={{ backgroundColor: `${platform.color}18`, color: platform.color }}
+                    >
+                      {platform.label[0]}
+                    </span>
                     <div>
                       <h4 className="font-semibold text-slate-900 text-sm">{platform.label}</h4>
                       <p className="text-xs text-slate-400">{platformContent.length} items</p>
@@ -6,6 +48,7 @@
                   </div>
                   <ArrowRight size={18} className="text-slate-300 group-hover:text-sky-500 group-hover:translate-x-1 transition-all" />
                 </div>
+
                 <p className="text-xs text-slate-500 mb-3 leading-relaxed">{platform.description}</p>
                 <div className="flex items-center gap-2 flex-wrap">
                   {platform.formats.map((fmtId) => {

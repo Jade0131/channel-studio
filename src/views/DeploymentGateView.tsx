@@ -111,90 +111,199 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
             <p className={`text-xs mt-0.5 ${canDeploy ? 'text-emerald-600' : 'text-amber-600'}`}>
               {canDeploy
                 ? 'The universal baseline workflow has passed validation and is cleared for deployment.'
-                : `${requiredCount - requiredChecked} required checklist items pending, ${openBlockers.length} open blockers, or core tests incomplete.`}
+                : `${requiredCount - requiredChecked} required checklist items pending, ${openBlockers.length} blocker(s) to resolve before deployment.`}
             </p>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900">{passCount}</p>
-              <p className="text-[10px] text-slate-500">Passed</p>
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
+          <h3 className="text-sm font-semibold text-slate-700">Deployment Checklist</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {requiredChecked} of {requiredCount} required items complete
+          </p>
+        </div>
+        <div className="p-5 space-y-2">
+          {checklist.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => toggleChecklistItem(item.id)}
+              className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                item.checked
+                  ? 'bg-emerald-50/50 border border-emerald-100'
+                  : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                  item.checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                }`}
+              >
+                {item.checked ? (
+                  <CheckCircle2 size={12} className="text-white" />
+                ) : (
+                  <Circle size={12} className="text-transparent" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className={`text-sm font-medium ${item.checked ? 'text-slate-700' : 'text-slate-600'}`}>
+                    {item.label}
+                  </p>
+                  {item.required ? (
+                    <span className="flex items-center gap-0.5 text-[9px] font-medium text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full">
+                      <Lock size={8} />
+                      Required
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-0.5 text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                      <Unlock size={8} />
+                      Optional
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.description}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Issues Found */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">Issues Found During Validation</h3>
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          {issues.length === 0 ? (
+            <div className="flex items-center justify-center py-8 text-sm text-slate-400">
+              <CheckCircle2 size={18} className="mr-2 text-emerald-400" />
+              No issues found
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-amber-600">{warningCount}</p>
-              <p className="text-[10px] text-slate-500">Warnings</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {issues.map((issue) => {
+                const sevCfg = SEVERITY_CONFIG[issue.severity];
+                const statusCfg = STATUS_BADGE[issue.status];
+                const stage = getWorkflowStage(issue.affectedStage);
+                return (
+                  <div key={issue.id} className="px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: sevCfg.bg }}
+                      >
+                        <Bug size={15} style={{ color: sevCfg.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: sevCfg.bg, color: sevCfg.color }}
+                          >
+                            {sevCfg.label}
+                          </span>
+                          <span
+                            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}
+                          >
+                            {statusCfg.label}
+                          </span>
+                          {stage && (
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                              {stage.label}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                          {issue.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-rose-500">{failCount}</p>
-              <p className="text-[10px] text-slate-500">Failed</p>
-            </div>
-          </div>
+          )}
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+          <span className="text-2xl font-bold text-sky-600">{passCount}</span>
+          <p className="text-xs text-slate-500 mt-1">Passed</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+          <span className="text-2xl font-bold text-amber-600">{warningCount}</span>
+          <p className="text-xs text-slate-500 mt-1">Warnings</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+          <span className="text-2xl font-bold text-red-600">{failCount}</span>
+          <p className="text-xs text-slate-500 mt-1">Failed</p>
         </div>
       </div>
 
       {/* Gate Conditions */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <GateCondition
-          label="All tests executed"
-          passed={allTestsRun}
-          detail={allTestsRun ? 'All 7 test scenarios have been run' : 'Some tests have not been run yet'}
-        />
-        <GateCondition
-          label="Critical tests passed"
-          passed={criticalTestsPassed}
-          detail={criticalTestsPassed ? 'All critical-weight tests passed or warned' : 'One or more critical tests failed or are pending'}
-        />
-        <GateCondition
-          label="Important tests passed"
-          passed={importantTestsPassed}
-          detail={importantTestsPassed ? 'All important-weight tests passed or warned' : 'One or more important tests failed or are pending'}
-        />
-        <GateCondition
-          label="No open blockers"
-          passed={openBlockers.length === 0}
-          detail={openBlockers.length === 0 ? 'No blocker-severity issues remain open' : `${openBlockers.length} blocker issue(s) need resolution`}
-        />
-        <GateCondition
-          label="Required checklist complete"
-          passed={requiredChecklistComplete}
-          detail={requiredChecklistComplete ? 'All required checklist items are checked' : `${requiredCount - requiredChecked} required item(s) still need to be checked`}
-        />
-        <GateCondition
-          label="Decision recorded"
-          passed={decision !== 'pending'}
-          detail={decision === 'ready' ? 'Decision: Deploy' : decision === 'rework' ? 'Decision: Rework' : 'No decision made yet'}
-        />
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">Gate Conditions</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <GateCondition label="All tests run" passed={allTestsRun} detail="Every test scenario must be executed at least once." />
+          <GateCondition label="Critical tests passed" passed={criticalTestsPassed} detail="All critical-weight tests must show 'passed' status." />
+          <GateCondition label="Important tests passed" passed={importantTestsPassed} detail="All important-weight tests must show 'passed' or 'warning' status." />
+          <GateCondition label="No open blockers" passed={openBlockers.length === 0} detail={`${openBlockers.length} blocker(s) still open.`} />
+          <GateCondition label="Required checklist complete" passed={requiredChecklistComplete} detail="All required deployment checklist items must be checked." />
+          <GateCondition label="Decision made" passed={decision !== 'pending'} detail={decision === 'pending' ? 'Awaiting your deployment decision.' : `Decision: ${decision}`} />
+        </div>
       </div>
 
-      {/* Deployment Checklist */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-slate-700">Deployment Readiness Checklist</h3>
-          <span className="text-xs text-slate-400">
-            {requiredChecked}/{requiredCount} required items checked
-          </span>
-        </div>
+      {/* Deploy Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={makeDecision}
+          disabled={!canDeploy}
+          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-xl transition-all ${
+            canDeploy
+              ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          {canDeploy ? <Rocket size={16} /> : <Lock size={16} />}
+          {canDeploy ? 'Deploy Now' : 'Gate Locked'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-        <div className="space-y-4">
-          {Object.entries(groupedChecklist).map(([category, items]) => {
-            const catCfg = CATEGORY_CONFIG[category];
-            const CatIcon = catCfg.icon;
-            return (
-              <div key={category} className="bg-white border border-slate-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${catCfg.color}12` }}
-                  >
-                    <CatIcon size={16} style={{ color: catCfg.color }} />
-                  </div>
-                  <h4 className="text-sm font-semibold text-slate-700">{catCfg.label}</h4>
-                </div>
-                <div className="space-y-2">
-                  {items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => toggleChecklistItem(item.id)}
-                      className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
-                        item.checked
-                          ? 'bg-emerald-50/50 border border-emerald-100'
-                          : 'bg-slate-50 border border-sl
+function GateCondition({ label, passed, detail }: { label: string; passed: boolean; detail: string }) {
+  return (
+    <div
+      className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+        passed
+          ? 'bg-emerald-50/50 border-emerald-100'
+          : 'bg-amber-50/50 border-amber-100'
+      }`}
+    >
+      <div
+        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+          passed ? 'bg-emerald-100' : 'bg-amber-100'
+        }`}
+      >
+        {passed ? (
+          <CheckCircle2 size={15} className="text-emerald-600" />
+        ) : (
+          <Circle size={15} className="text-amber-500" />
+        )}
+      </div>
+      <div>
+        <p className={`text-xs font-semibold ${passed ? 'text-emerald-800' : 'text-amber-800'}`}>
+          {label}
+        </p>
+        <p className={`text-[11px] mt-0.5 ${passed ? 'text-emerald-600' : 'text-amber-600'}`}>
+          {detail}
+        </p>
+      </div>
+    </div>
+  );
+}

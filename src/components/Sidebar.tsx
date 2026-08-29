@@ -97,4 +97,47 @@ export function Sidebar({ activeView, activePlatform, onNavigate, onPlatformSele
         </div>
 
         <div>
-          <p className="px-3 mb-2 t
+          <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Channels
+          </p>
+          <div className="space-y-1">
+            {PLATFORMS.map((platform) => {
+              const Icon = ICON_MAP[platform.icon] || Image;
+              const isActive = activeView === 'platform' && activePlatform === platform.id;
+              return (
+                <button
+                  key={platform.id}
+                  onClick={() => onPlatformSelect(platform.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group ${
+                    isActive
+                      ? 'bg-slate-800 text-white font-medium'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <span
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
+                    style={{ backgroundColor: `${platform.color}20` }}
+                  >
+                    <Icon size={15} style={{ color: platform.color }} />
+                  </span>
+                  <span className="flex-1 text-left">{platform.label}</span>
+                  <ChevronRight
+                    size={14}
+                    className={isActive ? 'text-slate-400' : 'text-slate-600'}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      <div className="px-4 py-4 border-t border-slate-800">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Workflow active</span>
+        </div>
+      </div>
+    </aside>
+  );
+}

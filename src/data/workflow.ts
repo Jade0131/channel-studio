@@ -121,7 +121,38 @@ export const EXTENSION_POINTS: ExtensionPoint[] = [
       { platform: 'instagram', behavior: 'Visual-first brief with shot list' },
       { platform: 'tiktok', behavior: 'Hook-first brief with sound direction' },
       { platform: 'pinterest', behavior: 'SEO-first brief with keyword density' },
-      { platform: 'linkedin', behavio },
+      { platform: 'linkedin', behavior: 'Thought leadership and industry discourse' },
+    ],
+  },
+  {
+    id: 'scheduling',
+    label: 'Scheduling',
+    description: 'Universal: time-slot assignment. Channel-specific: optimal posting windows and timezone logic.',
+    universal: false,
+    channelOverrides: [
+      { platform: 'instagram', behavior: 'Best times for Reels and Stories engagement' },
+      { platform: 'tiktok', behavior: 'Peak active hours for For You Page algorithm' },
+      { platform: 'pinterest', behavior: 'Evening and weekend pinning windows' },
+      { platform: 'linkedin', behavior: 'Business hours Tuesday–Thursday peak' },
+    ],
+  },
+  {
+    id: 'handoff',
+    label: 'Handoff',
+    description: 'Universal: queue delivery. Channel-specific: publishing API or manual export.',
+    universal: false,
+    channelOverrides: [
+      { platform: 'instagram', behavior: 'Instagram Graph API or manual Creator Studio export' },
+      { platform: 'tiktok', behavior: 'TikTok API publishing or scheduled draft upload' },
+      { platform: 'pinterest', behavior: 'Pinterest API pin scheduling or CSV bulk upload' },
+      { platform: 'linkedin', behavior: 'LinkedIn API article publishing or copy-paste draft' },
+    ],
+  },
+];
+
+export const MOCK_WORKFLOW_RUNS: WorkflowRun[] = [
+  { id: 'r001', date: '2026-08-17', stage: 'trigger', status: 'complete', itemsProcessed: 4, itemsGenerated: 4, duration: '0:01' },
+  { id: 'r002', date: '2026-08-17', stage: 'topic-selection', status: 'complete', itemsProcessed: 4, itemsGenerated: 4, duration: '0:09' },
   { id: 'r003', date: '2026-08-16', stage: 'brief-creation', status: 'complete', itemsProcessed: 4, itemsGenerated: 4, duration: '0:30' },
   { id: 'r004', date: '2026-08-16', stage: 'draft-generation', status: 'running', itemsProcessed: 2, itemsGenerated: 2, duration: '1:20' },
   { id: 'r005', date: '2026-08-16', stage: 'asset-production', status: 'pending', itemsProcessed: 0, itemsGenerated: 0, duration: '—' },
@@ -170,3 +201,16 @@ export const MOCK_APPROVAL_BATCHES: ApprovalBatch[] = [
 export function getWorkflowStage(id: string): WorkflowStage | undefined {
   return WORKFLOW_STAGES.find((s) => s.id === id);
 }
+
+export const FALLBACK_ROUTE: WorkflowStageId[] = [
+  'trigger',
+  'topic-selection',
+  'brief-creation',
+  'draft-generation',
+  'asset-production',
+  'caption-variants',
+  'approval-checkpoint',
+  'scheduling',
+];
+
+export const MOCK_RUNS = MOCK_WORKFLOW_RUNS;
