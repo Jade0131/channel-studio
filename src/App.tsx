@@ -19,6 +19,7 @@ import { InstagramPilotView } from '@/views/InstagramPilotView';
 import { TikTokSetupView } from '@/views/TikTokSetupView';
 import { PinterestSetupView } from '@/views/PinterestSetupView';
 import { LinkedInSetupView } from '@/views/LinkedInSetupView';
+import { ConnectionsView } from '@/views/ConnectionsView';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { useTestPlan } from '@/hooks/useTestPlan';
 import type { ViewId, PlatformId, ContentItem } from '@/types';
@@ -104,6 +105,7 @@ function App() {
           {activeView === 'deployment-gate' && <DeploymentGateView testPlan={testPlan} />}
           {activeView === 'channel-rollout' && <ChannelRolloutView />}
           {activeView === 'fallback-path' && <FallbackPathView />}
+          {activeView === 'connections' && <ConnectionsView />}
           {activeView === 'instagram-pilot' && <InstagramPilotView />}
           {activeView === 'tiktok-setup' && <TikTokSetupView />}
           {activeView === 'pinterest-setup' && <PinterestSetupView />}

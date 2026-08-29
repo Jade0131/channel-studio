@@ -34,6 +34,12 @@ Rollout order: validate baseline → deploy gate → Instagram pilot → TikTok 
 - Instagram pilot view, TikTok setup view, LinkedIn setup view working.
 - **Pinterest setup view added** (niche options, content pillars, daily flow,
   weekly schedule, review rhythm, growth tests, monetization paths + sidebar/TopBar wiring).
+- **Pinterest brain personalized** — niches now match the real account lane:
+  Dark Fantasy & Magic, Ancient Wisdom & Symbols, Dark & Atmospheric Photography,
+  Occult/Mystic/Succubus Aesthetics, Ritual & Altar Lifestyle.
+- **Account Connections screen added** — one place to see and connect all platforms
+  (Instagram, Facebook/Meta, TikTok, Pinterest, LinkedIn). Demo tick for now;
+  real login buttons come per platform as connectors are wired.
 - Deployment gate checklist in the app (10 items, 9 required before rollout).
 
 ### Next / future

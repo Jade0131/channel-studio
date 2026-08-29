@@ -16,6 +16,7 @@ import {
   Boxes,
   FlaskConical,
   ShieldCheck,
+  Cable,
   Rocket,
   Shield,
   Sparkles,
@@ -38,6 +39,7 @@ interface SidebarProps {
 
 const NAV_SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, view: 'dashboard' as ViewId },
+  { id: 'connections', label: 'Account Connections', icon: Cable, view: 'connections' as ViewId },
   { id: 'workflow', label: 'Baseline Workflow', icon: Zap, view: 'workflow' as ViewId },
   { id: 'approval', label: 'Weekly Approval', icon: CheckSquare, view: 'approval' as ViewId },
   { id: 'pipeline', label: 'Content Pipeline', icon: Workflow, view: 'pipeline' as ViewId },

@@ -131,6 +131,7 @@ export interface ExtensionPoint {
 
 export type ViewId =
   | 'dashboard'
+  | 'connections'
   | 'platform'
   | 'pipeline'
   | 'content'

@@ -11,6 +11,7 @@ interface TopBarProps {
 
 const VIEW_LABELS: Record<ViewId, string> = {
   dashboard: 'Dashboard',
+  connections: 'Account Connections',
   platform: 'Channel',
   pipeline: 'Content Pipeline',
   content: 'Handoff Flow',
