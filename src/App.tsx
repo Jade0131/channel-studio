@@ -17,6 +17,7 @@ import { ChannelRolloutView } from '@/views/ChannelRolloutView';
 import { FallbackPathView } from '@/views/FallbackPathView';
 import { InstagramPilotView } from '@/views/InstagramPilotView';
 import { TikTokSetupView } from '@/views/TikTokSetupView';
+import { PinterestSetupView } from '@/views/PinterestSetupView';
 import { LinkedInSetupView } from '@/views/LinkedInSetupView';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { useTestPlan } from '@/hooks/useTestPlan';
@@ -105,6 +106,7 @@ function App() {
           {activeView === 'fallback-path' && <FallbackPathView />}
           {activeView === 'instagram-pilot' && <InstagramPilotView />}
           {activeView === 'tiktok-setup' && <TikTokSetupView />}
+          {activeView === 'pinterest-setup' && <PinterestSetupView />}
           {activeView === 'linkedin-setup' && <LinkedInSetupView />}
         </main>
       </div>

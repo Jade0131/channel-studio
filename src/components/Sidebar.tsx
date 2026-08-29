@@ -51,6 +51,7 @@ const NAV_SECTIONS = [
   { id: 'fallback-path', label: 'Fallback Path', icon: Shield, view: 'fallback-path' as ViewId },
   { id: 'instagram-pilot', label: 'Instagram Pilot', icon: Sparkles, view: 'instagram-pilot' as ViewId },
   { id: 'tiktok-setup', label: 'TikTok Setup', icon: Music2, view: 'tiktok-setup' as ViewId },
+  { id: 'pinterest-setup', label: 'Pinterest Setup', icon: Image, view: 'pinterest-setup' as ViewId },
   { id: 'linkedin-setup', label: 'LinkedIn Setup', icon: Linkedin, view: 'linkedin-setup' as ViewId },
 ];
 

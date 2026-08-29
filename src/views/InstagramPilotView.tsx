@@ -211,8 +211,25 @@ export function InstagramPilotView() {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700">{check.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{check.description}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-medium text-slate-700">{adj.label}</p>
+                    {enabled ? (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-600">
+                        Enabled
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                        Off
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mb-1">
+                    <span className="font-medium text-slate-500">Universal:</span> {adj.universalBehavior}
+                  </p>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    <span className="font-medium text-slate-500">Instagram:</span> {adj.instagramBehavior}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1 italic">{adj.rationale}</p>
                 </div>
               </button>
             );

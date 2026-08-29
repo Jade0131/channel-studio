@@ -25,6 +25,7 @@ const VIEW_LABELS: Record<ViewId, string> = {
   'fallback-path': 'Fallback Path',
   'instagram-pilot': 'Instagram Pilot',
   'tiktok-setup': 'TikTok Setup',
+  'pinterest-setup': 'Pinterest Setup',
   'linkedin-setup': 'LinkedIn Setup',
 };
 

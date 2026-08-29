@@ -120,37 +120,59 @@ export function TikTokSetupView() {
             return (
               <button
                 key={niche.id}
-                onClick={() => allPrerequisitesMet && setSelectedNiche(niche)}
-                className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border transition-all ${
+                onClick={() => selectNiche(niche.id)}
+                className={`flex items-start gap-4 px-5 py-4 rounded-xl border text-left transition-all ${
                   isSelected
-                    ? 'bg-sky-50/50 border-sky-200 ring-2 ring-sky-100'
+                    ? 'bg-sky-50/50 border-sky-300 ring-1 ring-sky-200'
                     : 'bg-white border-slate-200 hover:bg-slate-50'
-                } ${!allPrerequisitesMet ? 'opacity-60' : ''}`}
+                }`}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${tiktokPlatform.color}15` }}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                    isSelected ? 'bg-sky-500' : 'bg-white border-2 border-slate-300'
+                  }`}
                 >
-                  <Music size={16} style={{ color: tiktokPlatform.color }} />
+                  {isSelected && <CheckCircle2 size={14} className="text-white" />}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-semibold text-slate-800">{niche.label}</h4>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
-                      {style.label}
-                    </span>
-                    <span className="text-[10px] text-slate-400">{pillar.frequency}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-2">{pillar.description}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {pillar.exampleFormats.map((fmt, i) => (
-                      <span
-                        key={i}
-                        className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 border border-slate-100"
-                      >
-                        {fmt}
+                    <h4 className="text-sm font-semibold text-slate-900">{niche.label}</h4>
+                    {niche.recommended && (
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700">
+                        <Sparkles size={10} />
+                        Recommended
                       </span>
-                    ))}
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-2">{niche.description}</p>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px]">
+                    <span className="flex items-center gap-1">
+                      <Users size={11} className="text-slate-400" />
+                      <span className="text-slate-400">Audience:</span>
+                      <span className={`font-medium ${AUDIENCE_STYLES[niche.audienceSize]}`}>
+                        {niche.audienceSize}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Target size={11} className="text-slate-400" />
+                      <span className="text-slate-400">Competition:</span>
+                      <span className={`font-medium ${COMPETITION_STYLES[niche.competition]}`}>
+                        {niche.competition}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <DollarSign size={11} className="text-slate-400" />
+                      <span className="text-slate-400">Monetization:</span>
+                      <span className={`font-medium ${
+                        niche.monetizationPotential === 'high'
+                          ? 'text-emerald-600'
+                          : niche.monetizationPotential === 'medium'
+                          ? 'text-amber-600'
+                          : 'text-slate-500'
+                      }`}>
+                        {niche.monetizationPotential}
+                      </span>
+                    </span>
                   </div>
                 </div>
               </button>

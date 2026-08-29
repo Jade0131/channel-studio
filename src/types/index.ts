@@ -145,6 +145,7 @@ export type ViewId =
   | 'fallback-path'
   | 'instagram-pilot'
   | 'tiktok-setup'
+  | 'pinterest-setup'
   | 'linkedin-setup';
 
 export interface NavItem {

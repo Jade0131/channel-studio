@@ -141,9 +141,9 @@ export function ChannelRolloutView() {
           const statusCfg = STATUS_CONFIG[step.status] || STATUS_CONFIG.locked;
           const expanded = expandedId === step.id;
           const criteriaMet = step.entryCriteria.every((c) => c.met);
-          const depsMet = areDependenciesMet(step.id);
-          const canAct = canActivate(step.id);
-          const canComp = canComplete(step.id);
+          const depsMet = areDependenciesMet(step, steps);
+          const canAct = canActivate(step);
+          const canComp = canComplete(step);
 
           return (
             <div
@@ -159,7 +159,7 @@ export function ChannelRolloutView() {
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: statusCfg.bg }}
                 >
-                  <step.icon size={16} style={{ color: statusCfg.color }} />
+                  <statusCfg.icon size={16} style={{ color: statusCfg.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

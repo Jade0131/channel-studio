@@ -1,7 +1,7 @@
-import { useLinkedInSetup } from '@/hooks/useLinkedInSetup';
+import { usePinterestSetup } from '@/hooks/usePinterestSetup';
 import { PLATFORMS } from '@/data/platforms';
 import {
-  Linkedin,
+  Image,
   Target,
   Layers,
   Zap,
@@ -17,10 +17,10 @@ import {
   Calendar,
 } from 'lucide-react';
 
-const LINKEDIN_COLOR = '#0A66C2';
+const PINTEREST_COLOR = '#E60023';
 
 const PRIORITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  core: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Core' },
+  core: { bg: 'bg-red-50', text: 'text-red-700', label: 'Core' },
   supporting: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Supporting' },
   experimental: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Experimental' },
 };
@@ -50,7 +50,7 @@ const COMPETITION_STYLES: Record<string, string> = {
   low: 'text-emerald-500',
 };
 
-export function LinkedInSetupView() {
+export function PinterestSetupView() {
   const {
     nicheOptions,
     selectedNiche,
@@ -64,9 +64,9 @@ export function LinkedInSetupView() {
     passedTests,
     monetizationPaths,
     weeklySchedule,
-  } = useLinkedInSetup();
+  } = usePinterestSetup();
 
-  const linkedinPlatform = PLATFORMS.find((p) => p.id === 'linkedin')!;
+  const pinterestPlatform = PLATFORMS.find((p) => p.id === 'pinterest')!;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -75,32 +75,32 @@ export function LinkedInSetupView() {
         <div className="flex items-center gap-3 mb-2">
           <div
             className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${LINKEDIN_COLOR}18` }}
+            style={{ backgroundColor: `${PINTEREST_COLOR}18` }}
           >
-            <Linkedin size={22} style={{ color: LINKEDIN_COLOR }} />
+            <Image size={22} style={{ color: PINTEREST_COLOR }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">LinkedIn Channel Setup</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Pinterest Channel Setup</h2>
             <p className="text-sm text-slate-500">
-              A repeatable LinkedIn workflow for text posts and supporting content formats — designed to
-              grow a stable professional audience baseline with minimal weekly approval overhead.
+              A repeatable Pinterest workflow for visual discovery pins and evergreen boards —
+              designed to grow search-driven traffic with minimal weekly approval overhead.
             </p>
           </div>
         </div>
       </div>
 
       {/* Goal Banner */}
-      <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-100 rounded-xl">
+      <div className="mb-8 p-4 bg-gradient-to-r from-red-50 to-slate-50 border border-red-100 rounded-xl">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-            <TrendingUp size={18} className="text-blue-600" />
+          <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+            <TrendingUp size={18} className="text-red-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-blue-800">Goal</p>
-            <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
-              Grow a stable professional audience baseline that could support a small passive income stream —
-              through paid newsletters, digital products, and consulting leads. Keep the workflow lightweight
-              enough to sustain alongside other channel work.
+            <p className="text-sm font-semibold text-red-800">Goal</p>
+            <p className="text-xs text-red-700 mt-0.5 leading-relaxed">
+              Build evergreen, search-driven pins that keep earning saves and outbound clicks for
+              months. Grow a stable visual brand that could support a passive income stream through
+              affiliate links, creator rewards, and digital products — all without showing your face.
             </p>
           </div>
         </div>
@@ -110,7 +110,7 @@ export function LinkedInSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Target size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Best Niche Direction for LinkedIn</h3>
+          <h3 className="text-sm font-semibold text-slate-700">Best Niche Direction for Pinterest</h3>
         </div>
         <div className="grid grid-cols-1 gap-3">
           {nicheOptions.map((niche) => {
@@ -122,13 +122,13 @@ export function LinkedInSetupView() {
                 aria-pressed={isSelected}
                 className={`flex items-start gap-4 px-5 py-4 rounded-xl border text-left transition-all ${
                   isSelected
-                    ? 'bg-blue-50/50 border-blue-300 ring-1 ring-blue-200'
+                    ? 'bg-red-50/50 border-red-300 ring-1 ring-red-200'
                     : 'bg-white border-slate-200 hover:bg-slate-50'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    isSelected ? 'bg-blue-500' : 'bg-white border-2 border-slate-300'
+                    isSelected ? 'bg-red-500' : 'bg-white border-2 border-slate-300'
                   }`}
                 >
                   {isSelected && <CheckCircle2 size={14} className="text-white" />}
@@ -137,7 +137,7 @@ export function LinkedInSetupView() {
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-sm font-semibold text-slate-900">{niche.label}</h4>
                     {niche.recommended && (
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
                         <Sparkles size={10} />
                         Recommended
                       </span>
@@ -174,7 +174,7 @@ export function LinkedInSetupView() {
                     </span>
                   </div>
                   {isSelected && (
-                    <p className="text-xs text-blue-700 italic mt-2 leading-relaxed">
+                    <p className="text-xs text-red-700 italic mt-2 leading-relaxed">
                       {niche.rationale}
                     </p>
                   )}
@@ -241,11 +241,11 @@ export function LinkedInSetupView() {
               <div key={step.id} className="flex items-start gap-3 relative">
                 <div
                   className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 z-10 ${
-                    step.automated ? 'bg-blue-100' : 'bg-slate-100'
+                    step.automated ? 'bg-red-100' : 'bg-slate-100'
                   }`}
                 >
                   {step.automated ? (
-                    <Zap size={16} className="text-blue-600" />
+                    <Zap size={16} className="text-red-600" />
                   ) : (
                     <Users size={16} className="text-slate-500" />
                   )}
@@ -255,7 +255,7 @@ export function LinkedInSetupView() {
                     <span className="text-[10px] font-bold text-slate-400">STEP {step.step}</span>
                     <h4 className="text-sm font-semibold text-slate-800">{step.label}</h4>
                     {step.automated ? (
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-600">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-red-50 text-red-600">
                         Automated
                       </span>
                     ) : (
@@ -284,13 +284,12 @@ export function LinkedInSetupView() {
         </div>
         <div className="overflow-hidden rounded-xl border border-slate-200">
           <table className="w-full text-sm">
-            <caption className="sr-only">LinkedIn weekly posting schedule by day, content pillar, format, and time</caption>
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th scope="col" className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Day</th>
-                <th scope="col" className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Content Pillar</th>
-                <th scope="col" className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Format</th>
-                <th scope="col" className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Time</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Day</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Content Pillar</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Format</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Time</th>
               </tr>
             </thead>
             <tbody>
@@ -346,14 +345,12 @@ export function LinkedInSetupView() {
 
       {/* Simple Testing Approach */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <FlaskConical size={16} className="text-slate-400" />
-            <h3 className="text-sm font-semibold text-slate-700">Simple Testing Approach for Growth</h3>
-            <span className="text-xs text-slate-400">
-              ({completedTests}/{growthTests.length} completed, {passedTests} passed)
-            </span>
-          </div>
+        <div className="flex items-center gap-2 mb-4">
+          <FlaskConical size={16} className="text-slate-400" />
+          <h3 className="text-sm font-semibold text-slate-700">Simple Testing Approach for Growth</h3>
+          <span className="text-xs text-slate-400">
+            ({completedTests}/{growthTests.length} completed, {passedTests} passed)
+          </span>
         </div>
         <div className="space-y-2">
           {growthTests.map((test) => {
@@ -362,7 +359,6 @@ export function LinkedInSetupView() {
               <button
                 key={test.id}
                 onClick={() => cycleTestStatus(test.id)}
-                aria-label={`${test.label} — status: ${style.label}. Click to change status.`}
                 className="w-full flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-left hover:bg-slate-50 transition-all"
               >
                 <div
@@ -445,17 +441,17 @@ export function LinkedInSetupView() {
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center shrink-0">
-            <Linkedin size={20} className="text-slate-500" />
+            <Image size={20} className="text-slate-500" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-slate-700">Setup Summary</h3>
             <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
               Niche: <span className="font-medium text-slate-700">{selectedNiche.label}</span>.
-              Post 6-7 times per week across core and supporting pillars. The AI generates a brief,
-              draft, and posting plan each morning — you review and schedule. Keep the approval pass
-              light: a daily read-through and one weekly batch review. Run growth tests every two
-              weeks and scale what works. Monetization starts with consulting and scales to
-              courses and sponsored content as the audience grows.
+              Post one faceless pin per day across core and supporting pillars. The AI pulls
+              high-intent keywords, designs the pin (title overlay + visual), and assigns it to the
+              right board with an SEO caption — you approve each day's pin. Pins stay evergreen, so
+              one good board keeps earning saves for months. Monetization starts with affiliate links
+              and scales to creator rewards and digital products as the audience grows.
             </p>
           </div>
         </div>

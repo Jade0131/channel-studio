@@ -260,7 +260,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
       {/* Deploy Button */}
       <div className="flex justify-end">
         <button
-          onClick={makeDecision}
+          onClick={() => makeDecision(canDeploy ? 'ready' : 'rework')}
           disabled={!canDeploy}
           className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-xl transition-all ${
             canDeploy
