@@ -71,3 +71,9 @@ itself from the other angle.
   that sits on top of the technical workflow.
 - `src/data/businessModels.ts` — typed data feeding the above: `MONETIZATION_MODELS`,
   `FIRST_TESTS`, `AUTOMATION_WORKFLOWS`, and `WEEKLY_REPORT_TEMPLATE` (builds clean).
+
+### Per-platform deep-dives (added)
+- `TIKTOK_DEEP_DIVE.md` — best niches, viable video formats, automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
+- `LINKEDIN_DEEP_DIVE.md` — best niches, viable posting formats, automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
+- `PINTEREST_DEEP_DIVE.md` — best niches, viable pin formats, automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
+- `src/data/platformDeepDives.ts` — typed data layer: per-platform automation tasks (full/semi/manual with daily minutes), format rankings, monetization tiers with revenue estimates, and automation safety boundaries. Builds clean.
