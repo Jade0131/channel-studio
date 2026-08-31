@@ -40,3 +40,13 @@ alter table public.account_connections
   add column if not exists access_token text;
 alter table public.account_connections
   add column if not exists verified boolean not null default false;
+
+-- OAuth columns for real platform connections
+alter table public.account_connections
+  add column if not exists external_id text;
+alter table public.account_connections
+  add column if not exists refresh_token text;
+alter table public.account_connections
+  add column if not exists expires_at timestamptz;
+alter table public.account_connections
+  add column if not exists profile_raw text;

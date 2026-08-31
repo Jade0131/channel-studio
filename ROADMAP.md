@@ -82,3 +82,13 @@ itself from the other angle.
 - `INSTAGRAM_DEEP_DIVE.md` — best niches (AI productivity visuals, faceless automation showcases), viable formats (screen recording Reels, carousels, before/after), automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
 - `src/data/instagramSetup.ts` — typed data: niche options, content pillars, daily flow, review rhythm, growth tests, weekly schedule, monetization paths. Builds clean.
 - `src/data/platformDeepDives.ts` — Instagram entry added: 11 automation tasks (6 full, 2 semi, 3 manual = 25 min/day human time), 7 format rankings, 4 monetization tiers, 4 safety boundaries.
+
+### Account Connections — OAuth backend (added)
+- `supabase/functions/auth_start/index.ts` — Edge Function: generates OAuth authorization URL and redirects user to platform login. Supports all 5 platforms.
+- `supabase/functions/auth_callback/index.ts` — Edge Function: receives OAuth code, exchanges for access token, fetches user profile, stores in Supabase, redirects to frontend with status.
+- `supabase/functions/_shared/config.ts` — Platform OAuth config (authorize URLs, token URLs, scopes, env var names).
+- `supabase/functions/_shared/cors.ts` — CORS headers for Edge Functions.
+- `supabase/config.toml` — Edge Functions enabled, auth_start and auth_callback configured with verify_jwt = false.
+- Frontend: `ConnectionsView.tsx` rebuilt with "Login with X" OAuth button (primary) + manual entry fallback (secondary). Handles OAuth callback on mount.
+- Frontend: `useAccountConnections` hook rewritten to support OAuth flow + verified state + secure token handling (tokens stored server-side only, not in localStorage).
+- `SUPABASE_EDGE_FUNCTIONS_GUIDE.md` — Full deployment guide: secrets setup, function deploy, platform redirect URI config, per-platform developer app registration instructions.

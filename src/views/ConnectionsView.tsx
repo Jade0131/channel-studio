@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccountConnections } from '@/hooks/useAccountConnections';
 import {
   Instagram,
@@ -12,6 +12,8 @@ import {
   Info,
   AlertTriangle,
   Loader2,
+  KeyRound,
+  Lock,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -22,9 +24,8 @@ interface ConnectorDef {
   icon: LucideIcon;
   powers: string;
   note: string;
-  credentialLabel: string;
-  credentialPlaceholder: string;
-  requiresCredential: boolean;
+  accountLabel: string;
+  accountPlaceholder: string;
 }
 
 const CONNECTORS: ConnectorDef[] = [
@@ -34,10 +35,9 @@ const CONNECTORS: ConnectorDef[] = [
     color: '#E1306C',
     icon: Instagram,
     powers: 'Instagram Pilot brain — reels, stories, posts',
-    note: 'Connects through Meta. Needs your Instagram username and a Meta/Instagram access token.',
-    credentialLabel: 'Instagram username',
-    credentialPlaceholder: 'e.g. @yourhandle',
-    requiresCredential: true,
+    note: 'Secure login via Meta. Your access token is stored server-side and never kept in the browser.',
+    accountLabel: 'Instagram username',
+    accountPlaceholder: 'e.g. @yourhandle',
   },
   {
     id: 'facebook',
@@ -45,10 +45,9 @@ const CONNECTORS: ConnectorDef[] = [
     color: '#1877F2',
     icon: Facebook,
     powers: 'Meta bridge — login + permission hub for Instagram & Facebook',
-    note: 'Enter the Facebook account name/page tied to your Meta. One login can authorize Instagram too.',
-    credentialLabel: 'Facebook account / page name',
-    credentialPlaceholder: 'e.g. Your Page',
-    requiresCredential: true,
+    note: 'One Meta login can authorize Instagram. Secure OAuth via Meta.',
+    accountLabel: 'Facebook account / page name',
+    accountPlaceholder: 'e.g. Your Page',
   },
   {
     id: 'tiktok',
@@ -56,10 +55,9 @@ const CONNECTORS: ConnectorDef[] = [
     color: '#69C9D0',
     icon: Music2,
     powers: 'TikTok Setup brain — short-form video content',
-    note: 'Logs in with username or phone. Enter your TikTok username and access token if you have one.',
-    credentialLabel: 'TikTok username',
-    credentialPlaceholder: 'e.g. @yourtiktok',
-    requiresCredential: true,
+    note: 'Secure TikTok OAuth login. Token stored server-side.',
+    accountLabel: 'TikTok username',
+    accountPlaceholder: 'e.g. @yourtiktok',
   },
   {
     id: 'pinterest',
@@ -67,10 +65,9 @@ const CONNECTORS: ConnectorDef[] = [
     color: '#E60023',
     icon: Image,
     powers: 'Pinterest Setup brain — dark fantasy, symbols, photography',
-    note: 'Enter the Pinterest username tied to your niche boards (dark fantasy, ancient symbols).',
-    credentialLabel: 'Pinterest username',
-    credentialPlaceholder: 'e.g. yourpinterest',
-    requiresCredential: true,
+    note: 'Secure Pinterest OAuth login tied to your niche boards.',
+    accountLabel: 'Pinterest username',
+    accountPlaceholder: 'e.g. yourpinterest',
   },
   {
     id: 'linkedin',
@@ -78,29 +75,38 @@ const CONNECTORS: ConnectorDef[] = [
     color: '#0A66C2',
     icon: Linkedin,
     powers: 'LinkedIn Setup brain — professional posts',
-    note: 'Enter your LinkedIn profile / company page name and a token if you have one.',
-    credentialLabel: 'LinkedIn name',
-    credentialPlaceholder: 'e.g. John Doe',
-    requiresCredential: true,
+    note: 'Secure LinkedIn OAuth login. Token stored server-side.',
+    accountLabel: 'LinkedIn name',
+    accountPlaceholder: 'e.g. John Doe',
   },
 ];
 
 export function ConnectionsView() {
-  const { connections, connect, disconnect, dbReady, loaded } = useAccountConnections();
+  const { connections, startOAuth, handleCallback, connectManual, disconnect, dbReady, loaded } = useAccountConnections();
+  const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState<Record<string, string>>({});
   const [error, setError] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
 
+  // Handle OAuth callback on mount
+  useEffect(() => {
+    handleCallback();
+  }, [handleCallback]);
+
   const connectedCount = CONNECTORS.filter((c) => connections[c.id]?.connected).length;
 
-  const handleConnect = async (connector: ConnectorDef) => {
+  const toggleForm = (id: string) => setManualOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const handleManualSave = async (connector: ConnectorDef) => {
     setError((prev) => ({ ...prev, [connector.id]: '' }));
     setSaving((prev) => ({ ...prev, [connector.id]: true }));
     const accountName = form[connector.id] || '';
     const token = form[`${connector.id}-token`] || '';
-    const result = await connect(connector.id, accountName, token);
+    const result = await connectManual(connector.id, accountName, token);
     if (!result.ok) {
       setError((prev) => ({ ...prev, [connector.id]: result.error || 'Connection failed' }));
+    } else {
+      setManualOpen((prev) => ({ ...prev, [connector.id]: false }));
     }
     setSaving((prev) => ({ ...prev, [connector.id]: false }));
   };
@@ -111,7 +117,7 @@ export function ConnectionsView() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Account Connections</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Enter your real account details for each platform. Nothing happens until you provide a valid account name.
+            Securely connect your social accounts with real login. Tokens are stored server-side in Supabase.
           </p>
         </div>
         <div
@@ -128,11 +134,10 @@ export function ConnectionsView() {
       <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
         <AlertTriangle size={18} className="text-amber-500 mt-0.5 shrink-0" />
         <p className="text-xs text-amber-800 leading-relaxed">
-          These are manual connects — you enter your account name and optional access token, and the system records it. A real
-          "verified" badge only appears once we wire a platform API check. Until then, an entry is stored but not verified by the platform.
+          To use secure OAuth login, the platform developer credentials (client ID + secret) must be set as Supabase secrets, and the Edge Functions deployed. Until then, use "Manual entry" below — it stores a real account name (no fake ticks), verified pending.
           {dbReady
-            ? ' Connections are saved to your Supabase database and sync across devices.'
-            : ' Connections are saved on this device only — run the SQL migration to switch to cloud storage.'}
+            ? ' Connected state syncs to your Supabase database and across devices.'
+            : ' Saved on this device only — run the SQL migration to switch to cloud sync.'}
         </p>
       </div>
 
@@ -142,10 +147,11 @@ export function ConnectionsView() {
           const conn = connections[connector.id];
           const connected = !!conn?.connected;
           const isSaving = !!saving[connector.id];
+          const isOpen = !!manualOpen[connector.id];
           return (
             <div
               key={connector.id}
-              className={`bg-white border rounded-xl p-5 transition-all ${
+              className={`bg-white border rounded-xl p-5 transition-all flex flex-col ${
                 connected ? 'border-emerald-200 shadow-sm' : 'border-slate-200'
               }`}
             >
@@ -168,71 +174,96 @@ export function ConnectionsView() {
               </div>
 
               {connected ? (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-1 flex-1">
                   <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2">
                     <p className="text-[11px] text-slate-500">Account</p>
-                    <p className="text-sm font-semibold text-slate-800">
-                      {conn?.accountName || '—'}
-                    </p>
+                    <p className="text-sm font-semibold text-slate-800 break-all">{conn?.accountName || '—'}</p>
                     {conn?.verified ? (
-                      <p className="text-[11px] text-emerald-600 mt-1">✓ Verified with platform</p>
+                      <p className="text-[11px] text-emerald-600 mt-1">✓ Verified with {connector.label}</p>
                     ) : (
-                      <p className="text-[11px] text-amber-600 mt-1">Saved — platform verification pending</p>
+                      <p className="text-[11px] text-amber-600 mt-1">Manual entry — platform verification pending</p>
                     )}
                   </div>
                   <button
                     onClick={() => disconnect(connector.id)}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all mt-auto"
                   >
                     <Plug size={14} />
                     Disconnect
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 flex-1 flex flex-col">
                   <p className="text-xs text-slate-500 leading-relaxed">{connector.note}</p>
 
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                      {connector.credentialLabel}
-                    </label>
-                    <input
-                      type="text"
-                      value={form[connector.id] || ''}
-                      onChange={(e) => setForm((prev) => ({ ...prev, [connector.id]: e.target.value }))}
-                      placeholder={connector.credentialPlaceholder}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                      Access token (optional)
-                    </label>
-                    <input
-                      type="password"
-                      value={form[`${connector.id}-token`] || ''}
-                      onChange={(e) => setForm((prev) => ({ ...prev, [`${connector.id}-token`]: e.target.value }))}
-                      placeholder="Paste token if you have one"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none"
-                    />
-                  </div>
-
-                  {error[connector.id] && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1">
-                      <AlertTriangle size={13} /> {error[connector.id]}
-                    </p>
-                  )}
-
+                  {/* Primary: OAuth login */}
                   <button
-                    onClick={() => handleConnect(connector)}
-                    disabled={isSaving}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-white hover:opacity-90 transition-all disabled:opacity-60"
+                    onClick={() => startOAuth(connector.id)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold text-white hover:opacity-90 transition-all"
                     style={{ backgroundColor: connector.color }}
                   >
-                    {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Plug size={14} />}
-                    {isSaving ? 'Connecting…' : 'Save & connect'}
+                    <KeyRound size={14} />
+                    Login with {connector.label}
                   </button>
+
+                  <div className="relative flex items-center">
+                    <div className="flex-grow border-t border-slate-200" />
+                    <span className="px-2 text-[10px] text-slate-400">OR</span>
+                    <div className="flex-grow border-t border-slate-200" />
+                  </div>
+
+                  {/* Manual fallback */}
+                  <button
+                    onClick={() => toggleForm(connector.id)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
+                  >
+                    <Lock size={14} />
+                    {isOpen ? 'Hide manual entry' : 'Manual entry'}
+                  </button>
+
+                  {isOpen && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {connector.accountLabel}
+                        </label>
+                        <input
+                          type="text"
+                          value={form[connector.id] || ''}
+                          onChange={(e) => setForm((prev) => ({ ...prev, [connector.id]: e.target.value }))}
+                          placeholder={connector.accountPlaceholder}
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          Access token (optional)
+                        </label>
+                        <input
+                          type="password"
+                          value={form[`${connector.id}-token`] || ''}
+                          onChange={(e) => setForm((prev) => ({ ...prev, [`${connector.id}-token`]: e.target.value }))}
+                          placeholder="Paste token if you have one"
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 outline-none"
+                        />
+                      </div>
+
+                      {error[connector.id] && (
+                        <p className="text-xs text-rose-600 flex items-center gap-1">
+                          <AlertTriangle size={13} /> {error[connector.id]}
+                        </p>
+                      )}
+
+                      <button
+                        onClick={() => handleManualSave(connector)}
+                        disabled={isSaving}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-60"
+                      >
+                        {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Plug size={14} />}
+                        {isSaving ? 'Saving…' : 'Save & connect'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -246,8 +277,8 @@ export function ConnectionsView() {
           {!loaded
             ? 'Loading saved connections…'
             : connectedCount === CONNECTORS.length
-            ? 'All platforms have an account saved. Head to Channel Rollout when you are ready.'
-            : 'No fake ticks — an account only counts as connected once you enter a real account name above.'}
+            ? 'All platforms connected. Every brain is unlocked.'
+            : 'Use "Login with…" for the secure OAuth flow, or "Manual entry" to store a real account name. No fake ticks.'}
         </p>
       </div>
     </div>
