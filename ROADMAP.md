@@ -77,3 +77,8 @@ itself from the other angle.
 - `LINKEDIN_DEEP_DIVE.md` — best niches, viable posting formats, automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
 - `PINTEREST_DEEP_DIVE.md` — best niches, viable pin formats, automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
 - `src/data/platformDeepDives.ts` — typed data layer: per-platform automation tasks (full/semi/manual with daily minutes), format rankings, monetization tiers with revenue estimates, and automation safety boundaries. Builds clean.
+
+### Instagram deep-dive (added)
+- `INSTAGRAM_DEEP_DIVE.md` — best niches (AI productivity visuals, faceless automation showcases), viable formats (screen recording Reels, carousels, before/after), automatable workflow parts, realistic monetization paths, weekly calendar, and key risks.
+- `src/data/instagramSetup.ts` — typed data: niche options, content pillars, daily flow, review rhythm, growth tests, weekly schedule, monetization paths. Builds clean.
+- `src/data/platformDeepDives.ts` — Instagram entry added: 11 automation tasks (6 full, 2 semi, 3 manual = 25 min/day human time), 7 format rankings, 4 monetization tiers, 4 safety boundaries.
