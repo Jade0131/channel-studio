@@ -64,3 +64,10 @@ Rollout order: validate baseline → deploy gate → Instagram pilot → TikTok 
 ## Granddad rule
 When the road is blocked, stop, step aside, and change the point of view. The block shows
 itself from the other angle.
+
+### Business model & workflow layer (added)
+- `CROSS_PLATFORM_BUSINESS_MODELS.md` — the shared monetization models, reusable
+  AI-agent workflows, ranked first tests, and the weekly/monthly decision framework
+  that sits on top of the technical workflow.
+- `src/data/businessModels.ts` — typed data feeding the above: `MONETIZATION_MODELS`,
+  `FIRST_TESTS`, `AUTOMATION_WORKFLOWS`, and `WEEKLY_REPORT_TEMPLATE` (builds clean).
