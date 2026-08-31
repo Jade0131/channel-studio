@@ -32,3 +32,11 @@ insert into public.account_connections (provider, label, connected) values
   ('pinterest', 'Pinterest', false),
   ('linkedin', 'LinkedIn', false)
 on conflict (provider) do nothing;
+
+-- Add account name + optional credential fields for real connects
+alter table public.account_connections
+  add column if not exists account_name text;
+alter table public.account_connections
+  add column if not exists access_token text;
+alter table public.account_connections
+  add column if not exists verified boolean not null default false;
