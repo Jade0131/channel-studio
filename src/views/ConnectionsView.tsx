@@ -81,10 +81,24 @@ const CONNECTORS: ConnectorDef[] = [
   },
 ];
 
+const FACEBOOK_PREPOP = {
+  pageName: 'Cosy Corner with Leni',
+  pageUrl: 'https://www.facebook.com/profile.php?id=111681144140468',
+  bio: 'Your safe space to unwind ✨ Relaxing reads, cozy vibes, inspiring quotes 📖💛 ...💙',
+  category: 'Interest',
+  location: 'Woking',
+  followers: '42,524',
+  following: '716',
+  website: 'sophia-stars.workers.dev',
+  profileImageUrl: '',
+  pageId: '111681144140468',
+};
+
 export function ConnectionsView() {
   const { connections, startOAuth, handleCallback, connectManual, disconnect, dbReady, loaded } = useAccountConnections();
   const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState<Record<string, string>>({});
+  const [profileForm, setProfileForm] = useState<Record<string, Record<string, string>>>({});
   const [error, setError] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
 
@@ -95,14 +109,26 @@ export function ConnectionsView() {
 
   const connectedCount = CONNECTORS.filter((c) => connections[c.id]?.connected).length;
 
-  const toggleForm = (id: string) => setManualOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleForm = (id: string) => {
+    setManualOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+    // Pre-populate Facebook fields on first open
+    if (id === 'facebook' && !profileForm[id]) {
+      setProfileForm((prev) => ({ ...prev, [id]: { ...FACEBOOK_PREPOP } }));
+      setForm((prev) => ({ ...prev, [id]: FACEBOOK_PREPOP.pageName }));
+    }
+  };
+
+  const setProfileField = (provider: string, field: string, value: string) => {
+    setProfileForm((prev) => ({ ...prev, [provider]: { ...(prev[provider] || {}), [field]: value } }));
+  };
 
   const handleManualSave = async (connector: ConnectorDef) => {
     setError((prev) => ({ ...prev, [connector.id]: '' }));
     setSaving((prev) => ({ ...prev, [connector.id]: true }));
     const accountName = form[connector.id] || '';
     const token = form[`${connector.id}-token`] || '';
-    const result = await connectManual(connector.id, accountName, token);
+    const prof = profileForm[connector.id] || {};
+    const result = await connectManual(connector.id, accountName, token, prof);
     if (!result.ok) {
       setError((prev) => ({ ...prev, [connector.id]: result.error || 'Connection failed' }));
     } else {
@@ -184,6 +210,26 @@ export function ConnectionsView() {
                       <p className="text-[11px] text-amber-600 mt-1">Manual entry — platform verification pending</p>
                     )}
                   </div>
+                  {/* Show profile metadata if available */}
+                  {connections[connector.id]?.profileRaw && Object.keys(connections[connector.id].profileRaw).length > 0 && (
+                    <div className="mt-2 p-2 bg-slate-50 rounded-lg border border-slate-100 text-[11px] space-y-1">
+                      {connections[connector.id].profileRaw.bio && (
+                        <p className="text-slate-600 italic">{connections[connector.id].profileRaw.bio}</p>
+                      )}
+                      {connections[connector.id].profileRaw.followers && (
+                        <p className="text-slate-500">👥 {connections[connector.id].profileRaw.followers} followers</p>
+                      )}
+                      {connections[connector.id].profileRaw.location && (
+                        <p className="text-slate-500">📍 {connections[connector.id].profileRaw.location}</p>
+                      )}
+                      {connections[connector.id].profileRaw.category && (
+                        <p className="text-slate-500">📂 {connections[connector.id].profileRaw.category}</p>
+                      )}
+                      {connections[connector.id].profileRaw.website && (
+                        <p className="text-slate-500">🔗 {connections[connector.id].profileRaw.website}</p>
+                      )}
+                    </div>
+                  )}
                   <button
                     onClick={() => disconnect(connector.id)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all mt-auto"
@@ -247,6 +293,43 @@ export function ConnectionsView() {
                           className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 outline-none"
                         />
                       </div>
+
+                      {/* Profile metadata fields */}
+                      {isOpen && (
+                        <div className="space-y-2 p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Profile Details</p>
+                          {[
+                            { key: 'pageUrl', label: 'Profile / Page URL', placeholder: 'https://...' },
+                            { key: 'bio', label: 'Bio / About', placeholder: 'Your bio here...', multiline: true },
+                            { key: 'category', label: 'Category', placeholder: 'e.g. Interest' },
+                            { key: 'location', label: 'Location', placeholder: 'e.g. Woking' },
+                            { key: 'followers', label: 'Followers', placeholder: 'e.g. 42,524' },
+                            { key: 'website', label: 'Website', placeholder: 'e.g. example.com' },
+                            { key: 'profileImageUrl', label: 'Profile Image URL', placeholder: 'https://...' },
+                          ].map(({ key, label, placeholder, multiline }) => (
+                            <div key={key}>
+                              <label className="block text-[10px] font-medium text-slate-500 mb-0.5">{label}</label>
+                              {multiline ? (
+                                <textarea
+                                  value={profileForm[connector.id]?.[key] || ''}
+                                  onChange={(e) => setProfileField(connector.id, key, e.target.value)}
+                                  placeholder={placeholder}
+                                  rows={2}
+                                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 outline-none resize-none"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={profileForm[connector.id]?.[key] || ''}
+                                  onChange={(e) => setProfileField(connector.id, key, e.target.value)}
+                                  placeholder={placeholder}
+                                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-400 outline-none"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {error[connector.id] && (
                         <p className="text-xs text-rose-600 flex items-center gap-1">

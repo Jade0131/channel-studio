@@ -10,6 +10,7 @@ export interface AccountConnection {
   accessToken: string;
   externalId: string;
   expiresAt: string;
+  profileRaw: Record<string, string>;
 }
 
 const LOCAL_KEY = 'channel-studio-connections';
@@ -34,6 +35,7 @@ function emptyConnections(): Record<string, AccountConnection> {
       accessToken: '',
       externalId: '',
       expiresAt: '',
+      profileRaw: {},
     };
   }
   return out;
@@ -61,11 +63,17 @@ export function useAccountConnections() {
       try {
         const { data, error } = await supabase
           .from('account_connections')
-          .select('provider, label, connected, verified, account_name, access_token, external_id, expires_at');
+          .select('provider, label, connected, verified, account_name, access_token, external_id, expires_at, profile_raw');
         if (error) throw error;
         if (data) {
           const map = emptyConnections();
           for (const row of data) {
+            let profileRaw: Record<string, string> = {};
+            try {
+              if (row.profile_raw) {
+                profileRaw = typeof row.profile_raw === 'string' ? JSON.parse(row.profile_raw) : row.profile_raw;
+              }
+            } catch { /* ignore parse errors */ }
             map[row.provider] = {
               provider: row.provider,
               label: row.label || PROVIDER_LABELS[row.provider] || row.provider,
@@ -75,6 +83,7 @@ export function useAccountConnections() {
               accessToken: row.access_token || '',
               externalId: row.external_id || '',
               expiresAt: row.expires_at || '',
+              profileRaw,
             };
           }
           setConnections((prev) => ({ ...prev, ...map }));
@@ -112,6 +121,7 @@ export function useAccountConnections() {
               access_token: conn.accessToken || null,
               external_id: conn.externalId || null,
               expires_at: conn.expiresAt || null,
+              profile_raw: Object.keys(conn.profileRaw || {}).length > 0 ? JSON.stringify(conn.profileRaw) : null,
               updated_at: new Date().toISOString(),
             },
             { onConflict: 'provider' }
@@ -148,6 +158,7 @@ export function useAccountConnections() {
             connected: true,
             verified: true,
             accountName: name || prev[provider].accountName,
+            profileRaw: prev[provider].profileRaw || {},
           },
         };
         persistLocal(next);
@@ -173,7 +184,7 @@ export function useAccountConnections() {
 
   // ── Manual connect ──
   const connectManual = useCallback(
-    async (provider: string, accountName: string, accessToken: string) => {
+    async (provider: string, accountName: string, accessToken: string, profileRaw: Record<string, string> = {}) => {
       const name = accountName.trim();
       if (!name) return { ok: false, error: 'Account name is required.' };
       const nextConn: AccountConnection = {
@@ -185,6 +196,7 @@ export function useAccountConnections() {
         accessToken: accessToken.trim(),
         externalId: '',
         expiresAt: '',
+        profileRaw,
       };
       setConnections((prev) => {
         const next = { ...prev, [provider]: nextConn };
@@ -209,6 +221,7 @@ export function useAccountConnections() {
         accessToken: '',
         externalId: '',
         expiresAt: '',
+        profileRaw: {},
       };
       setConnections((prev) => {
         const next = { ...prev, [provider]: disconnected };
