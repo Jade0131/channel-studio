@@ -9,7 +9,16 @@ export const PLATFORMS: Platform[] = [
     accent: '#F77737',
     formats: ['reels', 'stories', 'posts'],
     description: 'Visual storytelling through photos, reels, and stories',
+  },  {
+    id: 'facebook',
+    label: 'Facebook',
+    icon: 'Facebook',
+    color: '#1877F2',
+    accent: '#4267B2',
+    formats: ['posts', 'reels', 'stories'],
+    description: 'Community building, groups, and social connection through feed content',
   },
+
   {
     id: 'tiktok',
     label: 'TikTok',

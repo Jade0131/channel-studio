@@ -1,4 +1,4 @@
-export type PlatformId = 'instagram' | 'tiktok' | 'pinterest' | 'linkedin';
+export type PlatformId = 'instagram' | 'facebook' | 'tiktok' | 'pinterest' | 'linkedin';
 
 export type ContentFormatId =
   | 'reels'
