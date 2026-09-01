@@ -20,6 +20,7 @@ import { TikTokSetupView } from '@/views/TikTokSetupView';
 import { PinterestSetupView } from '@/views/PinterestSetupView';
 import { LinkedInSetupView } from '@/views/LinkedInSetupView';
 import { ConnectionsView } from '@/views/ConnectionsView';
+import { ContentGeneratorView } from '@/views/ContentGeneratorView';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { useTestPlan } from '@/hooks/useTestPlan';
 import type { ViewId, PlatformId, ContentItem } from '@/types';
@@ -110,6 +111,7 @@ function App() {
           {activeView === 'tiktok-setup' && <TikTokSetupView />}
           {activeView === 'pinterest-setup' && <PinterestSetupView />}
           {activeView === 'linkedin-setup' && <LinkedInSetupView />}
+          {activeView === 'content-generator' && <ContentGeneratorView />}
         </main>
       </div>
 

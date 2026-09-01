@@ -20,6 +20,7 @@ import {
   Rocket,
   Shield,
   Sparkles,
+  WandSparkles,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -39,6 +40,7 @@ interface SidebarProps {
 
 const NAV_SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, view: 'dashboard' as ViewId },
+  { id: 'content-generator', label: '✨ Generate Content', icon: WandSparkles, view: 'content-generator' as ViewId },
   { id: 'connections', label: 'Account Connections', icon: Cable, view: 'connections' as ViewId },
   { id: 'workflow', label: 'Baseline Workflow', icon: Zap, view: 'workflow' as ViewId },
   { id: 'approval', label: 'Weekly Approval', icon: CheckSquare, view: 'approval' as ViewId },

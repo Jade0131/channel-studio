@@ -147,7 +147,8 @@ export type ViewId =
   | 'instagram-pilot'
   | 'tiktok-setup'
   | 'pinterest-setup'
-  | 'linkedin-setup';
+  | 'linkedin-setup'
+  | 'content-generator';
 
 export interface NavItem {
   id: string;
