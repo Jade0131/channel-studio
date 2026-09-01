@@ -65,7 +65,6 @@ export function TopBar({ activeView, activePlatform, onSearch, searchQuery }: To
           </div>
           <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
             <Bell size={18} className="text-slate-600" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
             <Plus size={16} />
