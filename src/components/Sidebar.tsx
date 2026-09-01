@@ -44,6 +44,7 @@ const NAV_SECTIONS = [
   { id: 'connections', label: 'Account Connections', icon: Cable, view: 'connections' as ViewId },
   { id: 'workflow', label: 'Baseline Workflow', icon: Zap, view: 'workflow' as ViewId },
   { id: 'approval', label: 'Weekly Approval', icon: CheckSquare, view: 'approval' as ViewId },
+  { id: 'publish-handoff', label: 'Publish Handoff', icon: Rocket, view: 'publish-handoff' as ViewId },
   { id: 'pipeline', label: 'Content Pipeline', icon: Workflow, view: 'pipeline' as ViewId },
   { id: 'extensions', label: 'Extension Points', icon: Boxes, view: 'extensions' as ViewId },
   { id: 'inputs', label: 'Standard Inputs', icon: ArrowDownToLine, view: 'inputs' as ViewId },

@@ -29,6 +29,7 @@ const VIEW_LABELS: Record<ViewId, string> = {
   'pinterest-setup': 'Pinterest Setup',
   'linkedin-setup': 'LinkedIn Setup',
   'content-generator': 'Content Generator',
+  'publish-handoff': 'Publish Handoff',
 };
 
 export function TopBar({ activeView, activePlatform, onSearch, searchQuery }: TopBarProps) {

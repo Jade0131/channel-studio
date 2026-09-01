@@ -153,7 +153,8 @@ export type ViewId =
   | 'tiktok-setup'
   | 'pinterest-setup'
   | 'linkedin-setup'
-  | 'content-generator';
+  | 'content-generator'
+  | 'publish-handoff';
 
 export interface NavItem {
   id: string;
@@ -349,4 +350,29 @@ export interface ReusableLesson {
   lesson: string;
   appliesTo: PlatformId[];
   isInstagramSpecific: boolean;
+}
+
+// ── Publish Pipeline Types ──
+
+export type PublishStatus = 'pending' | 'publishing' | 'published' | 'failed';
+
+export interface PublishJob {
+  id: string;
+  contentId: string;
+  platform: PlatformId;
+  status: PublishStatus;
+  scheduledFor: string | null;
+  publishedAt: string | null;
+  externalId: string | null;
+  externalUrl: string | null;
+  errorMessage: string | null;
+  attemptCount: number;
+  lastAttemptAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Content item enriched with publish state
+export interface ScheduledContent extends ContentItem {
+  publishJob?: PublishJob;
 }
