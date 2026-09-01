@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { MOCK_CONTENT } from '@/data/mockContent';
-import type { ContentItem, ContentStatus, PlatformId, ContentStage } from '@/types';
+import type { ContentItem, ContentStatus, PlatformId, ContentStage, ContentInput, ContentOutput } from '@/types';
 
 interface DbRow {
   id: string;
   platform: string;
   format: string;
   title: string;
-  stage: ContentStage;
-  status: ContentStatus;
+  stage: string;
+  status: string;
   assignee: string | null;
   input: Record<string, unknown> | null;
   output: Record<string, unknown> | null;
@@ -23,11 +23,11 @@ function mapRow(row: DbRow): ContentItem {
     platform: row.platform as PlatformId,
     format: row.format as ContentItem['format'],
     title: row.title,
-    stage: row.stage,
-    status: row.status,
+    stage: row.stage as ContentItem['stage'],
+    status: row.status as ContentItem['status'],
     assignee: row.assignee || '',
-    input: (row.input as ContentItem['input']) || {},
-    output: (row.output as ContentItem['output']) || {},
+    input: (row.input as Partial<ContentInput>) || {},
+    output: (row.output as Partial<ContentOutput>) || {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -58,22 +58,24 @@ export function useContentData() {
     })();
   }, []);
 
-  const addContent = async (input: {
+  const addContent = useCallback(async (item: {
     platform: PlatformId;
     format: string;
     title: string;
     stage?: ContentStage;
     assignee?: string;
-  }) => {
+    input?: Partial<ContentInput>;
+    output?: Partial<ContentOutput>;
+  }): Promise<ContentItem> => {
     const row = {
-      platform: input.platform,
-      format: input.format,
-      title: input.title,
-      stage: input.stage || 'ideation',
+      platform: item.platform,
+      format: item.format,
+      title: item.title,
+      stage: item.stage || 'ideation',
       status: 'active' as ContentStatus,
-      assignee: input.assignee || '',
-      input: { topic: input.title },
-      output: {},
+      assignee: item.assignee || '',
+      input: item.input || { topic: item.title },
+      output: item.output || {},
     };
     try {
       const { data, error } = await supabase
@@ -83,29 +85,29 @@ export function useContentData() {
         .single();
       if (error) throw error;
       if (data) {
-        const item = mapRow(data as DbRow);
-        setContent((prev) => [item, ...prev]);
-        return item;
+        const mapped = mapRow(data as DbRow);
+        setContent((prev) => [mapped, ...prev]);
+        return mapped;
       }
     } catch {
-      // Offline fallback: keep in memory so the UI still feels responsive.
-      const temp: ContentItem = {
-        id: `local-${Date.now()}`,
-        platform: input.platform,
-        format: input.format as ContentItem['format'],
-        title: input.title,
-        stage: input.stage || 'ideation',
-        status: 'active',
-        assignee: input.assignee || '',
-        input: { topic: input.title },
-        output: {},
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setContent((prev) => [temp, ...prev]);
-      return temp;
+      // Offline fallback
     }
-  };
+    const temp: ContentItem = {
+      id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      platform: item.platform,
+      format: item.format as ContentItem['format'],
+      title: item.title,
+      stage: item.stage || 'ideation',
+      status: 'active',
+      assignee: item.assignee || '',
+      input: item.input || { topic: item.title },
+      output: item.output || {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setContent((prev) => [temp, ...prev]);
+    return temp;
+  }, []);
 
   return { content, dbLive, loading, addContent };
 }

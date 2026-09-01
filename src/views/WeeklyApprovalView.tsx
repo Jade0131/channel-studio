@@ -1,5 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { UseWorkflowReturn } from '@/hooks/useWorkflow';
+import { useWeeklyBatch } from '@/hooks/useWeeklyBatch';
+import { useContentData } from '@/hooks/useContentData';
+import type { ContentItem } from '@/types';
 import { getPlatform, getFormat } from '@/data/platforms';
 import type { ApprovalDecision, PlatformId } from '@/types';
 import {
@@ -36,6 +39,16 @@ interface WeeklyApprovalViewProps {
 
 export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
   const { approvalBatches, setApprovalDecision, closeBatch, pendingApprovals } = workflow;
+  const { batchId, weekLabel, items: weekItems, addToBatch } = useWeeklyBatch();
+  const { content } = useContentData();
+
+  // Content items in ideation/drafting that aren't in any batch yet
+  const unbatchedContent = useMemo(() => {
+    const batchedIds = new Set(approvalBatches.flatMap((b) => b.items.map((i) => i.contentId)));
+    return content.filter(
+      (c) => ['ideation', 'drafting'].includes(c.stage) && !batchedIds.has(c.id)
+    );
+  }, [content, approvalBatches]);
   const [activeBatchId, setActiveBatchId] = useState(
     approvalBatches.find((b) => b.status === 'open')?.id || approvalBatches[0]?.id || ''
   );
@@ -292,6 +305,61 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
           })}
         </div>
       </div>
+
+      {/* Unbatched Content — items generated but not yet in any approval batch */}
+      {unbatchedContent.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700">Generated, Not Yet in Batch</h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {unbatchedContent.length} item(s) waiting to join this week's review
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                for (const item of unbatchedContent) {
+                  await addToBatch(item);
+                }
+              }}
+              className="px-3 py-1.5 text-xs font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition-all"
+            >
+              Pull All Into Batch
+            </button>
+          </div>
+          <div className="space-y-2">
+            {unbatchedContent.map((item) => {
+              const platform = getPlatform(item.platform);
+              const format = getFormat(item.format);
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white border border-dashed border-slate-300 rounded-xl p-4 flex items-center gap-3"
+                >
+                  <span
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
+                    style={{ backgroundColor: `${platform?.color}18`, color: platform?.color }}
+                  >
+                    {platform?.label[0]}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{item.title}</p>
+                    <p className="text-xs text-slate-400">
+                      {platform?.label} · {format?.label} · {item.stage}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => addToBatch(item)}
+                    className="px-3 py-1.5 text-xs font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition-all shrink-0"
+                  >
+                    + Add
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

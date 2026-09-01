@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useContentData } from '@/hooks/useContentData';
+import { useWeeklyBatch } from '@/hooks/useWeeklyBatch';
 import { generateContent, generateContentAI, type GenerationInput } from '@/lib/generateContent';
 import { PLATFORMS, getPlatform, getFormat } from '@/data/platforms';
 import type { PlatformId, ContentItem } from '@/types';
@@ -42,6 +43,7 @@ const TONES = [
 
 export function ContentGeneratorView() {
   const { content, addContent, dbLive } = useContentData();
+  const { batchId, weekLabel, items: batchItems, addToBatch, addMultipleToBatch } = useWeeklyBatch();
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformId>('instagram');
   const [topic, setTopic] = useState('');
   const [niche, setNiche] = useState('AI productivity');
@@ -77,30 +79,35 @@ export function ContentGeneratorView() {
   }, [selectedPlatform, topic, niche, tone, audience, count, useAI]);
 
   const handleSaveItem = useCallback(async (item: ContentItem) => {
-    await addContent({
+    const savedItem = await addContent({
       platform: item.platform,
       format: item.format,
       title: item.title,
       stage: 'ideation',
       assignee: 'AI Generator',
+      input: item.input,
+      output: item.output,
     });
+    await addToBatch(savedItem);
     setSaved((prev) => new Set(prev).add(item.id));
-  }, [addContent]);
+  }, [addContent, addToBatch]);
 
   const handleSaveAll = useCallback(async () => {
-    for (const item of generated) {
-      if (!saved.has(item.id)) {
-        await addContent({
-          platform: item.platform,
-          format: item.format,
-          title: item.title,
-          stage: 'ideation',
-          assignee: 'AI Generator',
-        });
-        setSaved((prev) => new Set(prev).add(item.id));
-      }
+    const toSave = generated.filter((item) => !saved.has(item.id));
+    for (const item of toSave) {
+      const savedItem = await addContent({
+        platform: item.platform,
+        format: item.format,
+        title: item.title,
+        stage: 'ideation',
+        assignee: 'AI Generator',
+        input: item.input,
+        output: item.output,
+      });
+      await addToBatch(savedItem);
+      setSaved((prev) => new Set(prev).add(item.id));
     }
-  }, [generated, saved, addContent]);
+  }, [generated, saved, addContent, addToBatch]);
 
   const platform = getPlatform(selectedPlatform);
 
