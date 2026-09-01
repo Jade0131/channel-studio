@@ -98,6 +98,30 @@ const PLATFORM_TEMPLATES: Record<PlatformId, PlatformTemplates> = {
     postTimes: ["8:00 AM", "11:00 AM", "2:00 PM", "8:00 PM"],
     ctaExamples: ["Visit the link", "Save to board", "Follow for more", "Explore the full guide"],
   },
+  facebook: {
+    hooks: [
+      "Here's what nobody tells you about {topic}",
+      "Stop scrolling — {topic} is about to change everything",
+      "3 quick tips for {topic} that actually work",
+      "POV: You just discovered {topic} and now everything makes sense",
+      "The {topic} strategy that grew our community overnight",
+      "Unpopular opinion: {topic} is simpler than you think",
+      "We tried {topic} for a month. The results speak for themselves.",
+      "Your {topic} checklist for this week — save it",
+    ],
+    captionEndings: [
+      "Like this page for more {niche} insights daily",
+      "Share this with someone who needs to hear it",
+      "Drop your thoughts in the comments below",
+      "Save this post for when you need it",
+      "Tag a friend who'd benefit from this",
+      "What's your experience with {topic}?",
+    ],
+    hashtags: ["#aiproductivity", "#solobusiness", "#automationtips", "#digitaltools", "#worksmarter", "#productivityhacks", "#contentcreator", "#communitygrowth"],
+    formats: ["posts", "reels", "stories"],
+    postTimes: ["9:00 AM", "1:00 PM", "4:00 PM", "7:00 PM"],
+    ctaExamples: ["Like & Follow", "Share with your network", "Comment your thoughts", "Save for later"],
+  },
   linkedin: {
     hooks: [
       "I spent 3 years figuring out {topic}. Here's the short version:",
@@ -228,6 +252,7 @@ function generateVisualDirection(platform: PlatformId, topic: string): string {
   const platformSpecific = {
     instagram: `9:16 vertical (Reels) or 1:1 (Post). Text-safe zone centered. Brand colors.`,
     tiktok: `9:16 full screen. Hook text at top third. Fast cuts every 2-3 seconds.`,
+    facebook: `1200x630 landscape or 1:1 square. Bold text overlay. Eye-catching colors.`,
     pinterest: `2:3 vertical pin. Bold headline text at top. Clean white or dark bg.`,
     linkedin: `1200x627 landscape. Professional but bold. Minimal text, strong visual.`,
   };
@@ -253,6 +278,7 @@ function estimatedReach(platform: PlatformId): string {
   const ranges = {
     instagram: ['2K-5K', '5K-15K', '10K-25K', '15K-50K'],
     tiktok: ['5K-20K', '10K-50K', '50K-200K', '100K-1M'],
+    facebook: ['500-2K', '1K-5K', '3K-15K', '10K-50K'],
     pinterest: ['1K-3K', '3K-10K', '5K-20K', '10K-50K'],
     linkedin: ['500-2K', '1K-5K', '3K-10K', '5K-25K'],
   };
@@ -303,4 +329,100 @@ export function generateContent(input: GenerationInput): ContentItem[] {
   }
 
   return items;
+}
+
+// ── AI-powered content generation via Supabase Edge Function ──
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+
+interface AiGeneratedItem {
+  title?: string;
+  caption?: string;
+  hashtags?: string[];
+  script?: string;
+  visualDirection?: string;
+  thumbnailConcept?: string;
+  postingTime?: string;
+  estimatedReach?: string;
+  pinTitle?: string;
+  pinDescription?: string;
+  boardName?: string;
+  altText?: string;
+}
+
+function mapAiItem(item: AiGeneratedItem, platform: PlatformId, index: number): ContentItem {
+  const format = pick(PLATFORM_TEMPLATES[platform].formats);
+  return {
+    id: `ai-${Date.now()}-${index}`,
+    platform,
+    format: format as ContentItem['format'],
+    title: item.title || `AI Generated ${platform} Content ${index + 1}`,
+    stage: 'ideation' as ContentStage,
+    status: 'active',
+    createdAt: new Date(Date.now() + index * 86400000).toISOString(),
+    updatedAt: new Date().toISOString(),
+    assignee: 'AI Generator',
+    input: {
+      topic: '',
+      audience: '',
+      tone: '',
+      keywords: (item.hashtags || []).slice(0, 5),
+      callToAction: '',
+      brandGuidelines: '',
+    },
+    output: {
+      caption: item.caption || '',
+      hashtags: item.hashtags || [],
+      script: item.script || '',
+      visualDirection: item.visualDirection || '',
+      thumbnailConcept: item.thumbnailConcept || '',
+      postingTime: item.postingTime || bestPostingTime(platform),
+      estimatedReach: item.estimatedReach || estimatedReach(platform),
+      pinTitle: item.pinTitle,
+      pinDescription: item.pinDescription,
+      boardName: item.boardName,
+      altText: item.altText,
+    },
+  };
+}
+
+/**
+ * Generate content using AI (OpenAI via Supabase Edge Function).
+ * Falls back to template-based generation if the API is unavailable.
+ */
+export async function generateContentAI(input: GenerationInput): Promise<ContentItem[]> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-content`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        platform: input.platform,
+        topic: input.topic,
+        niche: input.niche,
+        tone: input.tone,
+        audience: input.audience,
+        count: input.count,
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn('AI generation failed, falling back to templates:', response.status);
+      return generateContent(input);
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      console.warn('AI generation error, falling back to templates:', data.error);
+      return generateContent(input);
+    }
+
+    const items: AiGeneratedItem[] = data.items || [];
+    return items.map((item, i) => mapAiItem(item, input.platform, i));
+  } catch (err) {
+    console.warn('AI generation unavailable, falling back to templates:', err);
+    return generateContent(input);
+  }
 }

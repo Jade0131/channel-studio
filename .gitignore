@@ -22,3 +22,7 @@ dist-ssr
 *.sw?
 .env
 supabase/.temp/
+src/data/platforms.ts.orig
+src/data/platforms.ts.rej
+src/index.css.orig
+src/index.css.rej

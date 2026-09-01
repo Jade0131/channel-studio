@@ -28,6 +28,7 @@ const VIEW_LABELS: Record<ViewId, string> = {
   'tiktok-setup': 'TikTok Setup',
   'pinterest-setup': 'Pinterest Setup',
   'linkedin-setup': 'LinkedIn Setup',
+  'content-generator': 'Content Generator',
 };
 
 export function TopBar({ activeView, activePlatform, onSearch, searchQuery }: TopBarProps) {

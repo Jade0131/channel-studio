@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { MOCK_RUNS, MOCK_APPROVAL_BATCHES } from '@/data/workflow';
-import { MOCK_CONTENT } from '@/data/mockContent';
-import type { WorkflowStageId, RunStatus, ApprovalDecision, PlatformId } from '@/types';
+import type { WorkflowStageId, RunStatus, ApprovalDecision, ApprovalItem } from '@/types';
+import { useApprovalPersistence } from './useApprovalPersistence';
 
 interface RunState {
   stageId: WorkflowStageId;
@@ -20,7 +20,24 @@ const INITIAL_RUN_STATES: RunState[] = [
 export function useWorkflow() {
   const [runStates, setRunStates] = useState<RunState[]>(INITIAL_RUN_STATES);
   const [fallbackActive, setFallbackActive] = useState(false);
+
+  const {
+    batches: dbBatches,
+    setBatches: setDbBatches,
+    loading: approvalLoading,
+    dbReady,
+    persistDecision,
+    closeBatchPersistence,
+  } = useApprovalPersistence();
+
+  // Merge: prefer DB batches if loaded, else fall back to mock
   const [approvalBatches, setApprovalBatches] = useState(MOCK_APPROVAL_BATCHES);
+
+  useEffect(() => {
+    if (!approvalLoading && dbBatches.length > 0) {
+      setApprovalBatches(dbBatches);
+    }
+  }, [approvalLoading, dbBatches]);
 
   const advanceStage = useCallback((stageId: WorkflowStageId) => {
     setRunStates((prev) => {
@@ -45,6 +62,7 @@ export function useWorkflow() {
 
   const setApprovalDecision = useCallback(
     (batchId: string, contentId: string, decision: ApprovalDecision, reviewer: string, notes: string) => {
+      // Update local state immediately for UI responsiveness
       setApprovalBatches((prev) =>
         prev.map((batch) =>
           batch.id !== batchId
@@ -59,15 +77,23 @@ export function useWorkflow() {
               }
         )
       );
+      // Persist to Supabase in background
+      persistDecision(batchId, contentId, decision, reviewer, notes);
     },
-    []
+    [persistDecision]
   );
 
-  const closeBatch = useCallback((batchId: string) => {
-    setApprovalBatches((prev) =>
-      prev.map((b) => (b.id === batchId ? { ...b, status: 'closed' } : b))
-    );
-  }, []);
+  const closeBatch = useCallback(
+    (batchId: string) => {
+      // Update local state
+      setApprovalBatches((prev) =>
+        prev.map((b) => (b.id === batchId ? { ...b, status: 'closed' } : b))
+      );
+      // Persist to Supabase and promote approved content
+      closeBatchPersistence(batchId);
+    },
+    [closeBatchPersistence]
+  );
 
   const todayRuns = useMemo(() => MOCK_RUNS.filter((r) => r.date === '2026-08-16'), []);
 
@@ -102,6 +128,7 @@ export function useWorkflow() {
     setApprovalDecision,
     closeBatch,
     pendingApprovals,
+    dbReady,
   };
 }
 

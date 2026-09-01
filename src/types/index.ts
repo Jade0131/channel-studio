@@ -51,6 +51,11 @@ export interface ContentOutput {
   thumbnailConcept: string;
   postingTime: string;
   estimatedReach: string;
+  // Pinterest-specific
+  pinTitle?: string;
+  pinDescription?: string;
+  boardName?: string;
+  altText?: string;
 }
 
 export interface ContentItem {

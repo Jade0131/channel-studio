@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useContentData } from '@/hooks/useContentData';
-import { generateContent, type GenerationInput } from '@/lib/generateContent';
+import { generateContent, generateContentAI, type GenerationInput } from '@/lib/generateContent';
 import { PLATFORMS, getPlatform, getFormat } from '@/data/platforms';
 import type { PlatformId, ContentItem } from '@/types';
 import {
@@ -48,6 +48,7 @@ export function ContentGeneratorView() {
   const [tone, setTone] = useState('Inspirational & empowering');
   const [audience, setAudience] = useState('');
   const [count, setCount] = useState(7);
+  const [useAI, setUseAI] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<ContentItem[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -60,7 +61,7 @@ export function ContentGeneratorView() {
     setSaved(new Set());
 
     // Simulate slight delay for UX
-    setTimeout(() => {
+    setTimeout(async () => {
       const input: GenerationInput = {
         platform: selectedPlatform,
         topic: topic.trim(),
@@ -69,11 +70,11 @@ export function ContentGeneratorView() {
         audience: audience.trim() || 'General audience interested in ' + niche,
         count,
       };
-      const items = generateContent(input);
+      const items = useAI ? await generateContentAI(input) : generateContent(input);
       setGenerated(items);
       setGenerating(false);
     }, 800);
-  }, [selectedPlatform, topic, niche, tone, audience, count]);
+  }, [selectedPlatform, topic, niche, tone, audience, count, useAI]);
 
   const handleSaveItem = useCallback(async (item: ContentItem) => {
     await addContent({
@@ -241,6 +242,40 @@ export function ContentGeneratorView() {
             </div>
           </div>
 
+          {/* AI Mode Toggle */}
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
+            <label className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              <Sparkles size={13} /> Content Source
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setUseAI(true)}
+                className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  useAI
+                    ? 'bg-violet-600 text-white shadow-md'
+                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <Sparkles size={14} />
+                AI Generated
+              </button>
+              <button
+                onClick={() => setUseAI(false)}
+                className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  !useAI
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <RefreshCw size={14} />
+                Template
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              AI mode uses OpenAI via Supabase Edge Function. Template mode works offline.
+            </p>
+          </div>
+
           {/* Generate button */}
           <button
             onClick={handleGenerate}
@@ -404,6 +439,52 @@ export function ContentGeneratorView() {
                             {item.output.thumbnailConcept}
                           </p>
                         </div>
+
+                        {/* Pinterest-specific fields */}
+                        {item.platform === 'pinterest' && (item.output.pinTitle || item.output.boardName) && (
+                          <div className="grid grid-cols-2 gap-3">
+                            {item.output.pinTitle && (
+                              <div>
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
+                                  <FileText size={12} /> Pin Title
+                                </div>
+                                <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+                                  {item.output.pinTitle}
+                                </p>
+                              </div>
+                            )}
+                            {item.output.boardName && (
+                              <div>
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
+                                  <Target size={12} /> Board
+                                </div>
+                                <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+                                  {item.output.boardName}
+                                </p>
+                              </div>
+                            )}
+                            {item.output.pinDescription && (
+                              <div className="col-span-2">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
+                                  <ScrollText size={12} /> Pin Description (SEO)
+                                </div>
+                                <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">
+                                  {item.output.pinDescription}
+                                </p>
+                              </div>
+                            )}
+                            {item.output.altText && (
+                              <div className="col-span-2">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
+                                  <ImageIcon size={12} /> Alt Text
+                                </div>
+                                <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+                                  {item.output.altText}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
