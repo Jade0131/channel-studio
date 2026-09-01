@@ -81,19 +81,6 @@ const CONNECTORS: ConnectorDef[] = [
   },
 ];
 
-const FACEBOOK_PREPOP = {
-  pageName: 'Cosy Corner with Leni',
-  pageUrl: 'https://www.facebook.com/profile.php?id=111681144140468',
-  bio: 'Your safe space to unwind ✨ Relaxing reads, cozy vibes, inspiring quotes 📖💛 ...💙',
-  category: 'Interest',
-  location: 'Woking',
-  followers: '42,524',
-  following: '716',
-  website: 'sophia-stars.workers.dev',
-  profileImageUrl: '',
-  pageId: '111681144140468',
-};
-
 export function ConnectionsView() {
   const { connections, startOAuth, handleCallback, connectManual, disconnect, dbReady, loaded } = useAccountConnections();
   const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({});
@@ -111,13 +98,7 @@ export function ConnectionsView() {
 
   const toggleForm = (id: string) => {
     setManualOpen((prev) => ({ ...prev, [id]: !prev[id] }));
-    // Pre-populate Facebook fields on first open
-    if (id === 'facebook' && !profileForm[id]) {
-      setProfileForm((prev) => ({ ...prev, [id]: { ...FACEBOOK_PREPOP } }));
-      setForm((prev) => ({ ...prev, [id]: FACEBOOK_PREPOP.pageName }));
-    }
   };
-
   const setProfileField = (provider: string, field: string, value: string) => {
     setProfileForm((prev) => ({ ...prev, [provider]: { ...(prev[provider] || {}), [field]: value } }));
   };
